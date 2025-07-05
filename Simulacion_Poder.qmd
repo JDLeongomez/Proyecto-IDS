@@ -1,0 +1,260 @@
+---
+title: "Simulating Fixation Times with Interacting Acoustic Factors"
+format: pdf
+editor: visual
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggdist)
+library(tidyquant)
+library(effectsize)
+library(lmerTest)
+```
+
+## Simulation Strategy
+
+This simulation models **total fixation time** (in milliseconds) as a function of three binary within-subject factors:
+
+-   $f_0$ SD: Standard deviation of $f_0$ (Low vs High)\
+-   $f_0$ mean: Mean $f_0$ (Low vs High)\
+-   $D_f$: Distance from a perceptual category boundary (Low vs High)
+
+Each of **1000 participants** views stimuli representing **all 8 combinations** of these factors. Fixation time is sampled from a normal distribution, with the following logic:
+
+-   **Main effects**:
+    -   $f_0$ SD: Strongest effect. Adds 100 ms when High.
+    -   $f_0$ mean: Adds 75 ms when High.
+    -   $D_f$: Adds 50 ms when High.
+-   **Interactions**:
+    -   $f_0$ SD × $f_0$ mean: Adds 100 ms when both High.
+    -   $f_0$ SD × $D_f$: Adds 100 ms when both High.
+    -   $f_0$ mean × $D_f$: Adds 50 ms when both High.
+    -   3-way interaction: Adds 120 ms when all three are High.
+
+A normal distribution with SD = 1000 ms is used to generate noisy trial-level data. Values are clamped between 0 and 5000 ms.
+
+------------------------------------------------------------------------
+
+## Simulate the Data
+
+```{r}
+set.seed(42)
+
+# Create all 8 condition combinations
+stimulus_conditions <- expand_grid(
+  f0_sd    = c("Low", "High"),
+  f0_mean  = c("Low", "High"),
+  Df       = c("Low", "High")
+)
+
+# Generate 1000 participant IDs
+participant_ids <- str_c("P", str_pad(1:1000, width = 4, pad = "0"))
+
+# Full design: each participant sees all conditions
+design <- expand_grid(
+  ID = participant_ids,
+  stimulus_conditions
+)
+
+# Simulate fixation times
+simulated_data <- design |>
+  mutate(
+    f0_sd_val   = if_else(f0_sd == "Low", 0, 1),
+    f0_mean_val = if_else(f0_mean == "Low", 0, 1),
+    Df_val      = if_else(Df == "Low", 0, 1),
+    
+    base_mean = 2500 + 100 * f0_sd_val,
+    effect_mean = 75 * f0_mean_val,
+    effect_df   = 50 * Df_val,
+    
+    interaction_effect = 100 * f0_sd_val * f0_mean_val + 
+      100 * f0_sd_val * Df_val + 
+      50  * f0_mean_val * Df_val +
+      120 * f0_sd_val * f0_mean_val * Df_val,
+    
+    mu = base_mean + effect_mean + effect_df + interaction_effect,
+    
+    fixation_time = round(rnorm(n(), mean = mu, sd = 1000)),
+    fixation_time = pmin(pmax(fixation_time, 0), 5000)
+  ) |>
+  select(ID, f0_sd, f0_mean, Df, fixation_time)
+```
+
+------------------------------------------------------------------------
+
+## Fit the Linear Mixed-Effects Model
+
+```{r}
+mod <- lmer(fixation_time ~ f0_sd * f0_mean * Df + (1 | ID), data = simulated_data)
+anova(mod)
+```
+
+------------------------------------------------------------------------
+
+## Estimate Partial Eta-Squared for Fixed Effects
+
+```{r}
+omega_squared(mod, partial = TRUE)
+```
+
+------------------------------------------------------------------------
+
+## Raincloud Plot
+
+```{r}
+# Prep factor labels and plotmath expressions
+plot_data <- simulated_data |>
+  mutate(
+    f0_mean = factor(f0_mean, levels = c("Low", "High")),
+    Df = factor(Df, levels = c("Low", "High")),
+    f0_sd = factor(f0_sd, levels = c("Low", "High"))
+  )
+
+label_f0_mean <- c("Low" = "italic(f)[0]*' mean'", 
+                   "High" = "italic(f)[0]*' mean'")
+label_Df <- c("Low" = "italic(D)[f]", 
+              "High" = "italic(D)[f]")
+
+# Create raincloud plot
+ggplot(plot_data, aes(x = f0_sd, y = fixation_time, fill = f0_sd)) +
+  stat_halfeye(
+    adjust = 0.5,
+    justification = -0.3,
+    .width = 0,
+    point_colour = NA,
+    alpha = 0.6
+  ) +
+  geom_jitter(
+    aes(color = f0_sd),
+    width = 0.1,
+    alpha = 0.05,
+    size = 0.7
+  ) +
+  stat_summary(
+    fun = mean,
+    geom = "point",
+    size = 2,
+    color = "black",
+    position = position_nudge(x = 0.2)
+  ) +
+  stat_summary(
+    fun.data = mean_se,
+    geom = "errorbar",
+    width = 0.1,
+    color = "black",
+    position = position_nudge(x = 0.2)
+  ) +
+  facet_grid(
+    Df ~ f0_mean,
+    labeller = labeller(
+      f0_mean = as_labeller(label_f0_mean, default = label_parsed),
+      Df = as_labeller(label_Df, default = label_parsed)
+    )
+  ) +
+  labs(
+    title = "Raincloud Plot of Fixation Times",
+    x = expression(italic(f)[0]*" SD"),
+    y = "Fixation Time (ms)",
+    fill = expression(italic(f)[0]*" SD"),
+    color = expression(italic(f)[0]*" SD")
+  ) +
+  scale_colour_tq() +
+  scale_fill_tq() +
+  theme_tq(base_size = 14)
+```
+
+------------------------------------------------------------------------
+
+## Power Estimation via Monte Carlo Simulation
+
+We now estimate the statistical power to detect the main effect of $f_0$ SD across repeated simulations. In each simulation, we randomly sample `n_sample` participants and fit the full model:
+
+```{r}
+# Power simulation function
+run_simulation <- function(dat, n_sample, n_sim) {
+  
+  map_dfr(seq_len(n_sim), \(i) {
+    
+    # Sample n participants
+    sampled_ids <- dat |>
+      distinct(ID) |>
+      slice_sample(n = n_sample) |>
+      pull(ID)
+    
+    sampled_data <- dat |>
+      filter(ID %in% sampled_ids)
+    
+    # Fit mixed model
+    mod <- lmer(fixation_time ~ f0_sd + (1 | ID), data = sampled_data)
+    
+    # Extract F and p for first fixed effect (f0_sd)
+    anova_res <- anova(mod)
+    
+    tibble(
+      sim = i,
+      f_value = anova_res$`F value`[1],
+      num_df = anova_res$NumDF[1],
+      den_df = anova_res$DenDF[1],
+      p_value = anova_res$`Pr(>F)`[1]
+    )
+  })
+}
+
+# Set alpha level
+alpha_lev <- 0.05
+
+# Run simulations (adjust n_sample and n_sim as needed)
+results <- run_simulation(simulated_data, n_sample = 100, n_sim = 1000) |>
+  mutate(signif = if_else(p_value < alpha_lev, "Significant", "Not significant"))
+
+# Estimate power
+power <- mean(results$signif == "Significant")
+```
+
+### Estimated Power
+
+```{r}
+power
+```
+
+## Power Distribution Plot
+
+```{r message = FALSE, warning = FALSE}
+ggplot(results, aes(x = p_value, fill = signif)) +
+  geom_histogram(
+    bins = 100,
+    breaks = seq(0, 1, 0.01),
+    color = "gray30",
+    alpha = 0.8
+  ) +
+  labs(
+    x = "p-value",
+    y = "Count",
+    fill = "Significance",
+    title = "Statistical Power for f₀ SD",
+    subtitle = bquote("1 - " * beta * " = " * .(round(power, 2)))
+  ) +
+  scale_fill_hue(direction = -1) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
+  scale_fill_tq() +
+  theme_tq() +
+  theme(
+    legend.position = c(0.98, 0.98),
+    legend.justification = c("right", "top"),
+    legend.background = element_rect(fill = alpha("white", 0.8)),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 9)
+  ) +
+  guides(fill = guide_legend(reverse = TRUE))
+```
+
+------------------------------------------------------------------------
+
+## Notes
+
+-   This simulation estimates **power for detecting the main effect of** $f_0$ SD only.
+-   You can modify the function to test other terms (e.g., interactions) by indexing a different row in the `anova()` output.
+-   For precision in planning, repeat this with multiple `n_sample` values.
+
+------------------------------------------------------------------------

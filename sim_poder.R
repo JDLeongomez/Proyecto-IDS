@@ -19,10 +19,11 @@ dat <- dat_wide|>
 mod <- lmer(Boca ~ Condicion + (1|ID),
             data = dat)  
 
-bla <- anova(mod)$`Pr(>F)`
+bla <- anova(mod)
 bla$`F value`
 bla$NumDF
 bla$DenDF
+bla$`Pr(>F)`
 
 ggplot(dat, aes(x = Condicion, y = Boca)) +
   geom_boxplot()
