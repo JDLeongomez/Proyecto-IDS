@@ -1,0 +1,607 @@
+---
+title: "Funciones evolutivas del habla dirigida a bebés: Impacto en la atención, las preferencias auditivas y el desarrollo lingüístico y musical temprano"
+subtitle: "**Estimación de poder con base en simulaciones**"
+author:
+  - name: Juan David Leongómez \orcidlink{0000-0002-0092-6298}
+    email: jleongomez@unbosque.edu.co
+    institute: codec
+    correspondence: true
+institute:
+  - codec: "CODEC: Cognitive and Behavioural Sciences, Faculty of Psychology, Universidad El Bosque, Bogotá 110121, Colombia."
+date: "`r if (.Platform$OS.type == 'windows') { Sys.setlocale('LC_TIME','Spanish_Spain') } else { Sys.setlocale('LC_TIME','es_CO.UTF-8') }; format(Sys.Date(), '%d de %B de %Y')`"
+output:
+  bookdown::pdf_document2:
+    citation_package: biblatex
+    highlight: zenburn
+    number_sections: yes
+    keep_tex:  false
+    toc: no
+    pandoc_args:
+      - '--lua-filter=Files/scholarly-metadata.lua'
+      - '--lua-filter=Files/author-info-blocks.lua'
+editor_options:
+  chunk_output_type: console
+geometry: margin=2cm
+header-includes: 
+  \usepackage{caption} 
+  \captionsetup[figure]{position=above}
+  \setlength{\headheight}{15pt}
+  \usepackage{float} 
+  \floatplacement{figure}{H} 
+  \usepackage[utf8]{inputenc} 
+  \usepackage{fancyhdr}
+  \pagestyle{fancy} 
+  \usepackage{hanging}
+  \lhead{Watkins et al.} 
+  \rhead{Supplementary Material - \textit{Funciones evolutivas del habla dirigida a bebés}}
+  \renewcommand{\abstractname}{Description} 
+  \usepackage[british]{babel}
+  \usepackage{csquotes}
+  \usepackage[style=apa,backend=biber]{biblatex}
+  \DeclareLanguageMapping{british}{british-apa}
+  \usepackage{hanging}
+  \usepackage{amsthm,amssymb,amsfonts}
+  \usepackage{tikz,lipsum,lmodern}
+  \usepackage{arydshln}
+  \usepackage{multicol}
+  \usepackage{orcidlink}
+  \newcommand{\opensupplement}{\setcounter{table}{0}
+    \renewcommand{\thetable}{S\arabic{table}} \setcounter{figure}{0}
+    \renewcommand{\thefigure}{S\arabic{figure}}}
+  \newcommand{\closesupplement}{\setcounter{table}{0}
+    \renewcommand{\thetable}{\arabic{table}} \setcounter{figure}{0}
+    \renewcommand{\thefigure}{\arabic{figure}}}
+  \usepackage{multirow,booktabs,setspace}
+  \DeclareCaptionLabelSeparator{point}{. }
+  \DeclareCaptionLabelSeparator{point}{. }
+  \captionsetup[table]{labelfont=bf,
+    textfont=it,
+    format=plain,
+    labelsep=point,
+    skip=5pt}
+  \captionsetup[figure]{labelfont=bf,
+    format=plain,
+    justification=justified,
+    singlelinecheck=false,
+    labelsep=point,
+    skip=5pt}
+always_allow_html: yes
+bibliography: Files/Bibliography.bib
+urlcolor: blue
+linkcolor: gray
+citecolor: gray
+link-citations: true
+---
+
+```{=tex}
+\begin{center}
+\textbf{Description}
+\end{center}
+
+\par
+\begingroup
+\leftskip3em
+\rightskip\leftskip
+```
+
+\textbf{Data simulation and power analysis approach:} 
+
+This technical appendix reports a Monte Carlo simulation study conducted to estimate the statistical power to detect main and interaction effects in a planned 2×2×2 within-subjects design. The outcome variable is total fixationtime, modeled as a function of three binary acoustic predictors: pitchvariability ($f_0$ SD), pitch mean ($f_0$ mean), and perceptual distance ($D_f$).Realistic effect sizes and noise were incorporated to reflect expectedexperimental conditions. Simulated datasets were analyzed using linearmixed-effects models with random intercepts for participants. Resultsdemonstrate that with approximately 160 participants, the study would achieve>80% power to detect all main effects. Interaction effects are weaker and wouldrequire larger samples to detect reliably. These findings support the proposedsample size and analytic strategy in the accompanying grant application.
+
+\textbf{Reproducibility:} 
+
+This document contains all code, and step by step explanations for all analyses, figures and tables (including supplementary figures and tables) for the simulation-based power analysis for \textbf{\textit{Funciones evolutivas del habla dirigida a bebés: Impacto en la atención, las preferencias auditivas y el desarrollo lingüístico y musical temprano}}
+
+Data are available on the Open Science Framework (OSF): \colorbox{pink}{https://doi.org/10.XXXXXX}. The power analysis strategy was designed by Juan David Leongómez, and the main analyses/models were designed by Christopher D. Watkins and Juan David Leongómez. This document and all its underlying code were created in R Markdown by Juan David Leongómez using R and \LaTeX.
+
+------------------------------------------------------------------------
+
+```{=latex}
+\par
+\endgroup
+
+{\hypersetup{hidelinks}
+\setcounter{tocdepth}{5}
+\tableofcontents
+}
+\opensupplement
+```
+
+```{r results = "hold", setup, include = FALSE}
+library(knitr)
+opts_chunk$set(fig.width = 12, fig.height = 8, fig.pos = "H")
+options(knitr.kable.NA = " ")
+opts_knit$set(eval.after = "fig.cap")
+```
+
+# Preliminaries
+
+## Load Packages
+
+This file was created using knitr [@knitrcit; @knitrbookcit], and analyses were performed using tidyverse packages for data manipulation and plotting [@tidyversecit], including dplyr [@dplyrcit], stringr [@stringrcit], and ggplot2 [@ggplotcit]. Power simulations were run using purrr and furrr [@furrrcit] for functional and parallel programming, and models were fit using lmerTest [@lmercit], an extension of lme4 that provides p-values for mixed-effects models. Effect size estimates were calculated using effectsize [@effectsizecit], and visualizations include enhanced plots using ggdist [@ggdistcit1; @ggdistcit2] for raincloud plots and tidyquant [@tidyquantcit] for custom color palettes. All packages can be installed from the Comprehensive R Archive Network (CRAN). For a complete list of package versions used in this analysis, see the Session Info section at the end of the document.
+
+```{r message = FALSE}
+# Load required packages
+library(tidyverse)   # Data manipulation and plotting
+library(ggdist)      # For raincloud plots
+library(tidyquant)   # For custom themes and color scales
+library(effectsize)  # For effect size estimates
+library(lmerTest)    # Linear mixed effects model with p-values
+library(furrr)       # Parallel processing with purrr
+library(scales)      # Scaling functions for plots
+library(stringr)     # String handling
+library(ggpubr)      # Plot arrangement
+library(truncnorm)   # Truncated normal distribution
+```
+
+# Study 1
+
+## Simulation Strategy
+
+This simulation models **total fixation time** (in milliseconds) as a function of three binary within-subject factors that are experimentally manipulated:
+
+-   $f_0~SD$: Pitch variability (Low vs High)\
+-   $f_0~mean$: Mean pitch (Low vs High)\
+-   $D_f$: Formant dispersion (Low vs High)
+
+Each of **1000 participants** views stimuli representing **all 8 combinations** of these factors. Fixation time is sampled from a normal distribution, with the following logic:
+
+-   **Main effects**:
+-   $f_0~SD$: Strongest effect. Adds 100 ms when High.
+-   $f_0~mean$: Adds 75 ms when High.
+-   $D_f$: Adds 50 ms when High.
+-   **Interactions**:
+-   $f_0~SD$ × $f_0~mean$: Adds 100 ms when both High.
+-   $f_0~SD$ × $D_f$: Adds 100 ms when both High.
+-   $f_0~mean$ × $D_f$: Adds 50 ms when both High.
+-   3-way interaction: Adds 120 ms when all three are High.
+
+A normal distribution with SD = 1000 ms is used to generate noisy trial-level data. Values are clamped between 0 and 5000 ms.
+
+## Simulate the Data
+
+```{r message = FALSE, warning = FALSE}
+set.seed(42)
+
+# Create all 8 condition combinations
+stimulus_conditions <- expand_grid(
+  f0_sd    = c("Low", "High"),
+  f0_mean  = c("Low", "High"),
+  Df       = c("Low", "High")
+)
+
+# Generate 1000 participant IDs
+participant_ids <- str_c("P", str_pad(1:1000, width = 4, pad = "0"))
+
+# Full crossed design: each participant sees every condition
+design <- expand_grid(
+  ID = participant_ids,
+  stimulus_conditions
+)
+
+# Simulate fixation times based on main and interaction effects
+simulated_data <- design |>
+  mutate(
+    f0_sd_val   = if_else(f0_sd == "Low", 0, 1),
+    f0_mean_val = if_else(f0_mean == "Low", 0, 1),
+    Df_val      = if_else(Df == "Low", 0, 1),
+    
+    base_mean = 2500 + 100 * f0_sd_val,
+    effect_mean = 75 * f0_mean_val,
+    effect_df   = 50 * Df_val,
+    
+    interaction_effect = 100 * f0_sd_val * f0_mean_val + 
+      100 * f0_sd_val * Df_val + 
+      50  * f0_mean_val * Df_val +
+      120 * f0_sd_val * f0_mean_val * Df_val,
+    
+    mu = base_mean + effect_mean + effect_df + interaction_effect,
+    
+    fixation_time = round(rnorm(n(), mean = mu, sd = 1000)),
+    fixation_time = pmin(pmax(fixation_time, 0), 5000)
+  ) |>
+  select(ID, f0_sd, f0_mean, Df, fixation_time)
+```
+
+### Fit the Linear Mixed-Effects Model
+
+We fit a linear mixed model with participant as a random effect, and test all main effects and interactions.
+
+The equation for the model is:
+
+$$
+\begin{aligned}
+  \operatorname{fixation\_time}_{i}  &\sim N \left(\mu, \sigma^2 \right) \\
+    \mu &=\alpha_{j[i]} + \beta_{1}(\operatorname{f0\_sd}_{\operatorname{Low}}) + \beta_{2}(\operatorname{f0\_mean}_{\operatorname{Low}}) + \beta_{3}(\operatorname{Df}_{\operatorname{Low}}) + \beta_{4}(\operatorname{f0\_mean}_{\operatorname{Low}} \times \operatorname{f0\_sd}_{\operatorname{Low}}) + \beta_{5}(\operatorname{Df}_{\operatorname{Low}} \times \operatorname{f0\_sd}_{\operatorname{Low}}) + \beta_{6}(\operatorname{Df}_{\operatorname{Low}} \times \operatorname{f0\_mean}_{\operatorname{Low}}) + \beta_{7}(\operatorname{Df}_{\operatorname{Low}} \times \operatorname{f0\_mean}_{\operatorname{Low}} \times \operatorname{f0\_sd}_{\operatorname{Low}}) \\
+    \alpha_{j}  &\sim N \left(\mu_{\alpha_{j}}, \sigma^2_{\alpha_{j}} \right)
+    \text{, for ID j = 1,} \dots \text{,J}
+\end{aligned}
+$$
+```{r message = FALSE, warning = FALSE}
+mod <- lmer(fixation_time ~ f0_sd * f0_mean * Df + (1 | ID), data = simulated_data)
+anova(mod)
+```
+
+### Estimate Partial Eta-Squared for Fixed Effects
+
+We estimate partial omega squared ($\omega^2_p$) to quantify the effect size of each fixed term in the model.
+
+```{r message = FALSE, warning = FALSE}
+pop_effect <- omega_squared(mod, partial = TRUE)
+pop_effect
+```
+
+### Visualizing Effects: Raincloud Plot
+
+Below is a raincloud plot showing fixation time distributions for each condition. The plot allows visual inspection of differences by $f_0~SD$, split by $f_0~mean$ and $D_f$.
+
+```{r message = FALSE, warning = FALSE, fig.cap = "Distribution of fixation times as a function of $f_0~SD$ (x-axis), split by $f_0~mean$ (columns) and $D_f$ (rows). Each panel includes both the density distribution, individual data points (jittered dots), and condition means with error bars. Fixation times increase with higher $f_0~SD$, and effects are modulated by the other acoustic features."}
+# Prepare data with clean factor levels
+plot_data <- simulated_data |>
+  mutate(
+    f0_mean = factor(f0_mean, levels = c("Low", "High")),
+    Df = factor(Df, levels = c("Low", "High")),
+    f0_sd = factor(f0_sd, levels = c("Low", "High"))
+  )
+
+# Labels for facets
+label_f0_mean <- c("Low" = "italic(f)[0]*' mean'", 
+                   "High" = "italic(f)[0]*' mean'")
+label_Df <- c("Low" = "italic(D)[f]", 
+              "High" = "italic(D)[f]")
+
+# Raincloud plot
+ggplot(plot_data, aes(x = f0_sd, y = fixation_time, fill = f0_sd)) +
+  # Distribution cloud
+  stat_halfeye( 
+    adjust = 0.5,
+    justification = -0.3,
+    .width = 0,
+    point_colour = NA,
+    alpha = 0.6
+  ) +
+  # Raw points
+  geom_jitter(
+    aes(color = f0_sd),
+    width = 0.1,
+    alpha = 0.05,
+    size = 0.7
+  ) +
+  # Mean point
+  stat_summary(
+    fun = mean,
+    geom = "point",
+    size = 2,
+    color = "black",
+    position = position_nudge(x = 0.2)
+  ) +
+  # Error bar
+  stat_summary(
+    fun.data = mean_se,
+    geom = "errorbar",
+    width = 0.1,
+    color = "black",
+    position = position_nudge(x = 0.2)
+  ) +
+  # Facet by f0_mean × Df
+  facet_grid(
+    Df ~ f0_mean,
+    labeller = labeller(
+      f0_mean = as_labeller(label_f0_mean, default = label_parsed),
+      Df = as_labeller(label_Df, default = label_parsed)
+    )
+  ) +
+  labs(
+    title = "Raincloud Plot of Fixation Times",
+    x = expression(italic(f)[0]*" SD"),
+    y = "Fixation Time (ms)",
+    fill = expression(italic(f)[0]*" SD"),
+    color = expression(italic(f)[0]*" SD")
+  ) +
+  scale_colour_tq() +
+  scale_fill_tq() +
+  theme_tq(base_size = 14)
+```
+
+## Power Estimation via Monte Carlo Simulation
+
+We estimate statistical power for detecting each effect by simulating `r number(1000)` random samples from the simulated population at varying sample sizes. Specifically, from the simulated population ($N$ = `r number(1000)`), we draw `r number(1000)` random samples of size $n$ = 10, another `r number(1000)` samples of size $n$ = 20, and so on, continuing in this way until we draw `r number(1000)` samples of size $n$ = 200. For each of the `r number(20000)` samples, we fit the same linear mixed model, examine the resulting distribution of $p$-values, and estimate the probability of detecting a statistically significant effect for each model term.
+
+```{r message = FALSE, warning = FALSE, cache = TRUE}
+# Define alpha level
+alpha_lev = 0.05
+
+# Function to run multiple power simulations for each n
+run_power_sim <- function(dat, n_sample, n_sim, alpha = alpha_lev) {
+  # Run `n_sim` simulations for each sample size
+  map_dfr(seq_len(n_sim), \(i) {
+    # Sample participants
+    ids <- dat |> distinct(ID) |> slice_sample(n = n_sample) |> pull(ID)
+    sampled_data <- dat |> filter(ID %in% ids)
+    
+    # Fit model
+    mod <- lmer(fixation_time ~ f0_sd * f0_mean * Df + (1 | ID), data = sampled_data)
+    
+    # Extract ANOVA results
+    anova_res <- anova(mod)
+    
+    # Grab all terms of interest
+    term_names <- rownames(anova_res)
+    
+    # Loop over all fixed terms
+    map_dfr(term_names, \(term) {
+      tibble(
+        sim = i,
+        term = term,
+        n_sample = n_sample,
+        p_value = anova_res[term, "Pr(>F)"],
+        signif = ifelse(p_value < alpha, "Significant", "Non-significant")
+      )
+    })
+  }) |>
+    # Clean up and aggregate
+    filter(!is.na(p_value))
+}
+
+# Define sample sizes and run the simulations
+sample_sizes <- seq(10, 200, by = 10)
+term_order <- c(
+  "f0_sd",
+  "f0_mean",
+  "Df",
+  "f0_sd:f0_mean",
+  "f0_sd:Df",
+  "f0_mean:Df",
+  "f0_sd:f0_mean:Df"
+)
+
+plan(multisession)  # Parallel if available
+
+power_results <- map_dfr(
+  sample_sizes,
+  ~ run_power_sim(simulated_data, n_sample = .x, n_sim = 1000),
+  .id = "sample_step"
+) |> 
+  mutate(term = factor(term, levels = term_order))
+```
+
+### Power summary
+
+This aggregates the simulation results to compute average power for each term and sample size.
+
+```{r message = FALSE, warning = FALSE}
+power_summ <- power_results |>
+  group_by(term, n_sample) |>
+  summarise(
+    power = mean(p_value < alpha_lev, na.rm = TRUE),
+    .groups = "drop"
+  )
+```
+
+### Power curve
+
+This plot shows the power curves for all main effects and interactions, highlighting the sample sizes where power exceeds 80%.
+
+```{r fig.cap = "Power curves for detecting main effects and interactions. Panels show statistical power as a function of sample size for each fixed effect (A) and interaction (B). Dots indicate simulation-based power estimates at each sample size, with red dashed lines marking the 80% power threshold. Most main effects achieve high power with sample sizes under 160, whereas interaction terms remain underpowered across this range, reflecting smaller true effects."}
+# Setup labels and clean grouping
+term_labels <- c(
+  "f0_sd"              = "italic(f)[0]*' SD'",
+  "f0_mean"            = "italic(f)[0]*' mean'",
+  "Df"                 = "italic(D)[f]",
+  "f0_sd:f0_mean"      = "italic(f)[0]*' SD × '*italic(f)[0]*' mean'",
+  "f0_sd:Df"           = "italic(f)[0]*' SD × '*italic(D)[f]",
+  "f0_mean:Df"         = "italic(f)[0]*' mean × '*italic(D)[f]",
+  "f0_sd:f0_mean:Df"   = "italic(f)[0]*' SD × '*italic(f)[0]*' mean × '*italic(D)[f]"
+)
+
+# Split by main vs interaction effects
+main_power_summ <- power_summ |> 
+  filter(!str_detect(term, ":"))
+int_power_summ <- power_summ |> 
+  filter(str_detect(term, ":"))
+
+# Find minimum n where power exceeds 0.8
+sample_power_08 <- main_power_summ |> 
+  filter(power > 0.8) |> 
+  group_by(term) |> 
+  filter(power == min(power, na.rm = TRUE))
+
+# Use largest of those ns for final recommendation, 
+# to ensure appropriate power for each main effects
+final_sample_size <- max(sample_power_08$n_sample)
+
+# Power at final n
+sample_fin <- main_power_summ |> 
+  filter(n_sample == final_sample_size) |> 
+  arrange(desc(power))
+
+# Plot power curves for main and interaction effects
+ggarrange(
+  ggplot(main_power_summ, aes(x = n_sample, y = power)) +
+    geom_line(linewidth = 0.5) +
+    geom_point(aes(color = power > 0.8), size = 2) +  # Color by condition
+    geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
+    scale_colour_tq(
+      labels = c("FALSE" = "<= 80%", "TRUE" = "> 80%"),
+      name = "Power threshold"
+    ) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+    labs(
+      title = "Power Curves for Main Effects",
+      x = "Number of Participants",
+      y = "Estimated Power"
+    ) +
+    theme_tq() +
+    facet_wrap(~term, labeller = as_labeller(term_labels, label_parsed)),
+  ggplot(int_power_summ, aes(x = n_sample, y = power)) +
+    geom_line(linewidth = 0.5) +
+    geom_point(aes(color = power > 0.8), size = 2) +  # Color by condition
+    geom_hline(yintercept = 0.8, linetype = "dashed", color = "red") +
+    scale_colour_tq(
+      labels = c("FALSE" = "<= 80%", "TRUE" = "> 80%"),
+      name = "Power threshold"
+    ) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+    labs(
+      title = "Power Curves for Interactions",
+      x = "Number of Participants",
+      y = "Estimated Power"
+    ) +
+    theme_tq() +
+    facet_wrap(~term, labeller = as_labeller(term_labels, label_parsed)),
+  labels = "AUTO",
+  common.legend = TRUE,
+  legend = "bottom"
+)
+```
+
+### Estimating a sample size
+
+In the simulated population, the effects of the interactions are extremely weak and would require a very large sample size to be reliably detected. In contrast, the main effects of $f_0~SD$, $f_0~mean$, and $D_f$ are detectable with a more reasonable sample size. If the true population effects are as simulated ($\omega^2_p$ = `r number(pop_effect$Omega2_partial[1:3], accuracy = 0.001)`, respectively), a statistical power of 0.8 would be reached with a sample size of $n$ = `r sample_power_08 |> filter(term == "f0_sd") |> pull(n_sample)` for $f_0~SD$, $n$ = `r sample_power_08 |> filter(term == "f0_mean") |> pull(n_sample)` for $f_0~mean$, and $n$ = `r sample_power_08 |> filter(term == "Df") |> pull(n_sample)` for $D_f$.
+
+Based on simulations:
+
+-   Power exceeds 80% for the main effects at $n$ = `r final_sample_size`
+-   Corresponding partial omega squared values were: `r number(pop_effect$Omega2_partial[1:3], accuracy = 0.001)`
+
+Therefore, $n$ = `r final_sample_size` participants would reliably detect all main effects. Interaction effects require larger samples due to weaker true effects.
+
+## Power Distribution at Final Sample
+
+Below we visualize the distribution of p-values at the final sample size for all effects, illustrating expected Type I/II error profiles.
+
+```{r message = FALSE, warning = FALSE, fig.cap = "Distribution of $p$-values across simulations at $n$ = `r final_sample_size`. This figure shows the $p$-value distribution for each effect, based on 1000 simulation runs using the final recommended sample size. Main effects show a strong skew toward low $p$-values, consistent with high power. Interactions yield more uniform distributions, indicating limited sensitivity to detect those effects at this sample size."}
+# Filter for final n
+final_power <- power_summ |> 
+  filter(n_sample == final_sample_size)
+
+# Get full p-value data at that n
+main_power_results <- power_results |> 
+  filter(!str_detect(term, ":")) |> 
+  group_by(term) |> 
+  filter(n_sample == final_sample_size) |> 
+  left_join(final_power, by = c("term", "n_sample"))
+int_power_results <- power_results |> 
+  filter(str_detect(term, ":")) |> 
+  group_by(term) |> 
+  filter(n_sample == final_sample_size) |> 
+  left_join(final_power, by = c("term", "n_sample"))
+
+# Plot distributions
+ggarrange(
+  ggplot(main_power_results, aes(x = p_value, fill = signif, colour = signif)) +
+    geom_histogram(
+      bins = 100,
+      breaks = seq(0, 1, 0.01),
+      alpha = 0.8
+    ) +
+    geom_text(
+      data = main_power_results |> distinct(term, power),
+      aes(
+        x = Inf, y = Inf,
+        label = paste0("Power = ", round(power, 2))
+      ),
+      vjust = 1.5, hjust = 1.1,
+      inherit.aes = FALSE
+    ) +
+    labs(
+      x = "p-value",
+      y = "Count",
+      fill = "Significance",
+      title = "Distribution of p values for Main Effects"
+    ) +
+    scale_fill_hue(direction = -1) +
+    scale_colour_hue(direction = -1) +
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
+    facet_wrap(~term, labeller = as_labeller(term_labels, label_parsed)) +
+    scale_colour_tq() +
+    scale_fill_tq() +
+    theme_tq() +
+    guides(fill = guide_legend(reverse = TRUE)),
+  ggplot(int_power_results, aes(x = p_value, fill = signif, colour = signif)) +
+    geom_histogram(
+      bins = 100,
+      breaks = seq(0, 1, 0.01),
+      alpha = 0.8
+    ) +
+    geom_text(
+      data = int_power_results |> distinct(term, power),
+      aes(
+        x = Inf, y = Inf,
+        label = paste0("Power = ", round(power, 2))
+      ),
+      vjust = 1.5, hjust = 1.1,
+      inherit.aes = FALSE
+    ) +
+    labs(
+      x = "p-value",
+      y = "Count",
+      fill = "Significance",
+      title = "Distribution of p values for Interactions"
+    ) +
+    scale_fill_hue(direction = -1) +
+    scale_colour_hue(direction = -1) +
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
+    facet_wrap(~term, labeller = as_labeller(term_labels, label_parsed)) +
+    scale_colour_tq() +
+    scale_fill_tq() +
+    theme_tq() +
+    guides(fill = guide_legend(reverse = TRUE)),
+  labels = "AUTO",
+  common.legend = TRUE,
+  legend = "bottom"
+)
+```
+
+## Notes
+
+-   This simulation estimates **power for detecting the main effect of** $f_0~SD$ only.
+-   You can modify the function to test other terms (e.g., interactions) by indexing a different row in the `anova()` output.
+-   For precision in planning, repeat this with multiple `n_sample` values.
+
+------------------------------------------------------------------------
+
+# Study 2
+
+## Simulation Strategy
+
+To be decided (this is much simpler)
+
+```{r}
+
+
+n <- 1000
+mu <- 55
+sd <- 20
+vocab <- rtruncnorm(n, a=0, b=100, mean=mu, sd=sd)
+summary(vocab)
+
+```
+
+
+
+
+----------------------------------------------------------------------
+
+```{=latex}
+\closesupplement
+```
+
+# Session info (for reproducibility) {#session}
+
+```{r results = "hold", warning = FALSE, message = FALSE}
+library(pander)
+pander(sessionInfo(), locale = FALSE)
+```
+
+----------------------------------------------------------------------
+
+# Supplementary references {#refs}
+
+\begin{multicols}{2}
+\AtNextBibliography{\footnotesize}
+\printbibliography[heading=none]
+\normalsize
+\end{multicols}
+
+\def\printbibliography{}
