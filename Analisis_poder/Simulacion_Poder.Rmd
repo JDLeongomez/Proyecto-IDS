@@ -560,12 +560,6 @@ ggarrange(
 )
 ```
 
-## Notes
-
--   This simulation estimates **power for detecting the main effect of** $f_0~SD$ only.
--   You can modify the function to test other terms (e.g., interactions) by indexing a different row in the `anova()` output.
--   For precision in planning, repeat this with multiple `n_sample` values.
-
 ------------------------------------------------------------------------
 
 # Study 2
