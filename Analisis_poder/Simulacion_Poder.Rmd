@@ -132,6 +132,7 @@ library(scales)      # Scaling functions for plots
 library(stringr)     # String handling
 library(ggpubr)      # Plot arrangement
 library(truncnorm)   # Truncated normal distribution
+library(TOSTER)      # For power analsis and equivalence testing
 ```
 
 # Study 1
@@ -211,10 +212,10 @@ The equation for the model is:
 
 $$
 \begin{aligned}
-  \operatorname{fixation\_time}_{i}  &\sim N \left(\mu, \sigma^2 \right) \\
-    \mu &=\alpha_{j[i]} + \beta_{1}(\operatorname{f0\_sd}_{\operatorname{Low}}) + \beta_{2}(\operatorname{f0\_mean}_{\operatorname{Low}}) + \beta_{3}(\operatorname{Df}_{\operatorname{Low}}) + \beta_{4}(\operatorname{f0\_mean}_{\operatorname{Low}} \times \operatorname{f0\_sd}_{\operatorname{Low}}) + \beta_{5}(\operatorname{Df}_{\operatorname{Low}} \times \operatorname{f0\_sd}_{\operatorname{Low}}) + \beta_{6}(\operatorname{Df}_{\operatorname{Low}} \times \operatorname{f0\_mean}_{\operatorname{Low}}) + \beta_{7}(\operatorname{Df}_{\operatorname{Low}} \times \operatorname{f0\_mean}_{\operatorname{Low}} \times \operatorname{f0\_sd}_{\operatorname{Low}}) \\
-    \alpha_{j}  &\sim N \left(\mu_{\alpha_{j}}, \sigma^2_{\alpha_{j}} \right)
-    \text{, for ID j = 1,} \dots \text{,J}
+\operatorname{fixation\_time}_{i}  &\sim N \left(\mu, \sigma^2 \right) \\
+\mu &=\alpha_{j[i]} + \beta_{1}(\operatorname{f0\_sd}_{\operatorname{Low}}) + \beta_{2}(\operatorname{f0\_mean}_{\operatorname{Low}}) + \beta_{3}(\operatorname{Df}_{\operatorname{Low}}) + \beta_{4}(\operatorname{f0\_mean}_{\operatorname{Low}} \times \operatorname{f0\_sd}_{\operatorname{Low}}) + \beta_{5}(\operatorname{Df}_{\operatorname{Low}} \times \operatorname{f0\_sd}_{\operatorname{Low}}) + \beta_{6}(\operatorname{Df}_{\operatorname{Low}} \times \operatorname{f0\_mean}_{\operatorname{Low}}) + \beta_{7}(\operatorname{Df}_{\operatorname{Low}} \times \operatorname{f0\_mean}_{\operatorname{Low}} \times \operatorname{f0\_sd}_{\operatorname{Low}}) \\
+\alpha_{j}  &\sim N \left(\mu_{\alpha_{j}}, \sigma^2_{\alpha_{j}} \right)
+\text{, for ID j = 1,} \dots \text{,J}
 \end{aligned}
 $$
 ```{r message = FALSE, warning = FALSE}
@@ -359,7 +360,7 @@ plan(multisession)  # Parallel if available
 
 power_results <- map_dfr(
   sample_sizes,
-  ~ run_power_sim(simulated_data, n_sample = .x, n_sim = 1000),
+  ~ run_power_sim(simulated_data, n_sample = .x, n_sim = 10),
   .id = "sample_step"
 ) |> 
   mutate(term = factor(term, levels = term_order))
@@ -408,11 +409,11 @@ sample_power_08 <- main_power_summ |>
 
 # Use largest of those ns for final recommendation, 
 # to ensure appropriate power for each main effects
-final_sample_size <- max(sample_power_08$n_sample)
+final_sample_size_st1 <- max(sample_power_08$n_sample)
 
 # Power at final n
 sample_fin <- main_power_summ |> 
-  filter(n_sample == final_sample_size) |> 
+  filter(n_sample == final_sample_size_st1) |> 
   arrange(desc(power))
 
 # Plot power curves for main and interaction effects
@@ -461,30 +462,30 @@ In the simulated population, the effects of the interactions are extremely weak 
 
 Based on simulations:
 
--   Power exceeds 80% for the main effects at $n$ = `r final_sample_size`
+-   Power exceeds 80% for the main effects at $n$ = `r final_sample_size_st1`
 -   Corresponding partial omega squared values were: `r number(pop_effect$Omega2_partial[1:3], accuracy = 0.001)`
 
-Therefore, $n$ = `r final_sample_size` participants would reliably detect all main effects. Interaction effects require larger samples due to weaker true effects.
+Therefore, $n$ = `r final_sample_size_st1` participants would reliably detect all main effects. Interaction effects require larger samples due to weaker true effects.
 
 ## Power Distribution at Final Sample
 
 Below we visualize the distribution of p-values at the final sample size for all effects, illustrating expected Type I/II error profiles.
 
-```{r message = FALSE, warning = FALSE, fig.cap = "Distribution of $p$-values across simulations at $n$ = `r final_sample_size`. This figure shows the $p$-value distribution for each effect, based on 1000 simulation runs using the final recommended sample size. Main effects show a strong skew toward low $p$-values, consistent with high power. Interactions yield more uniform distributions, indicating limited sensitivity to detect those effects at this sample size."}
+```{r message = FALSE, warning = FALSE, fig.cap = "Distribution of $p$-values across simulations at $n$ = `r final_sample_size_st1`. This figure shows the $p$-value distribution for each effect, based on 1000 simulation runs using the final recommended sample size. Main effects show a strong skew toward low $p$-values, consistent with high power. Interactions yield more uniform distributions, indicating limited sensitivity to detect those effects at this sample size."}
 # Filter for final n
 final_power <- power_summ |> 
-  filter(n_sample == final_sample_size)
+  filter(n_sample == final_sample_size_st1)
 
 # Get full p-value data at that n
 main_power_results <- power_results |> 
   filter(!str_detect(term, ":")) |> 
   group_by(term) |> 
-  filter(n_sample == final_sample_size) |> 
+  filter(n_sample == final_sample_size_st1) |> 
   left_join(final_power, by = c("term", "n_sample"))
 int_power_results <- power_results |> 
   filter(str_detect(term, ":")) |> 
   group_by(term) |> 
-  filter(n_sample == final_sample_size) |> 
+  filter(n_sample == final_sample_size_st1) |> 
   left_join(final_power, by = c("term", "n_sample"))
 
 # Plot distributions
@@ -563,22 +564,176 @@ ggarrange(
 
 # Study 2
 
-## Simulation Strategy
+This section reports a power analysis for Study 2, which investigates the relationship between two continuous variables using Pearson’s correlation. We evaluate two complementary statistical goals:
 
-To be decided (this is much simpler)
+1. **Detecting a correlation** of at least $\rho$ = 0.30 (directional, one-sided test).
+2. **Testing for equivalence**, to determine whether an observed correlation is statistically indistinguishable from zero, within a predefined margin of ±0.25.
 
-```{r}
+We used the `TOSTER::power_z_cor()` function to compute power analytically across a range of sample sizes [@tostercit1; @tostercit2].
 
+```{r message=FALSE, warning=FALSE, fig.height = 6, fig.width = 8, fig.cap = "Power curves for detecting a positive correlation (gray line) and for concluding statistical equivalence to zero (red line) across different sample sizes. Dashed and dotted lines represent 80% and 90% power thresholds, respectively. Vertical dotted lines represents the sample size where power reaches $1 - \\beta$ = 0.9."}
+# Parameters
+eq_bounds <- 0.15
+rho_pop <- 0.30
+alpha <- 0.05
+n_sim <- 100000
 
-n <- 1000
-mu <- 55
-sd <- 20
-vocab <- rtruncnorm(n, a=0, b=100, mean=mu, sd=sd)
-summary(vocab)
+# Panel A: Power curves
+sample_sizes <- 5:600
 
+power_detect <- map_dbl(sample_sizes, ~
+                          power_z_cor(
+                            alternative = "greater",
+                            alpha = alpha,
+                            rho = rho_pop,
+                            n = .x,
+                            power = NULL
+                          )$power
+)
+
+power_equiv <- map_dbl(sample_sizes, ~
+                         power_z_cor(
+                           alternative = "equivalence",
+                           alpha = alpha,
+                           null = eq_bounds,
+                           rho = 0,
+                           n = .x,
+                           power = NULL
+                         )$power
+)
+
+power_df <- tibble(
+  n = sample_sizes,
+  Detection = power_detect,
+  Equivalence = power_equiv
+) |> 
+  pivot_longer(-n, names_to = "Test", values_to = "Power")
+
+subtitle_text <- substitute(
+  expression("Effect size for detection: " * rho == r * ", Equivalence bounds: ±" * eq),
+  list(r = rho_pop, eq = eq_bounds)
+)
+
+final_sample_size_st2 <- power_df |>
+  filter(Test == "Equivalence", Power >= 0.9) |>
+  summarise(min_n = min(n)) |>
+  pull(min_n)
+
+p_sample_size_st2 <- power_df |>
+  filter(Test == "Detection", Power >= 0.9) |>
+  summarise(min_n = min(n)) |>
+  pull(min_n)
+
+# Power curves
+ggplot(power_df, aes(x = n, y = Power, color = Test)) +
+  geom_line(linewidth = 1) +
+  geom_hline(yintercept = 0.8, linetype = "dashed") +
+  geom_hline(yintercept = 0.9, linetype = "dotted") +
+  geom_vline(xintercept = final_sample_size_st2, colour = "#E31A1C") +
+  annotate("text", y = 0.5, x = final_sample_size_st2,
+           label = bquote(italic(n) == .(final_sample_size_st2)),
+           hjust = 0.5, vjust = 1.3, angle = 90,
+           color = "#E31A1C", size = 3) +
+  geom_vline(xintercept = p_sample_size_st2, colour = "#2c3e50") +
+  annotate("text", y = 0.5, x = p_sample_size_st2,
+           label = bquote(italic(n) == .(p_sample_size_st2)),
+           hjust = 0.5, vjust = 1.3, angle = 90,
+           color = "#2c3e50", size = 3) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    title = "Power Curves for Correlation Detection and Equivalence Testing",
+    subtitle = eval(subtitle_text),
+    x = "Sample Size (n)",
+    y = "Statistical Power",
+    color = "Test Type"
+  ) +
+  scale_colour_tq() +
+  theme_tq()
 ```
 
+In general, with a sample of 477 participants, correlations of $\rho \geq 0.23$ will likely produce conclusive evidence of a positive effect **not** equivalent to zero; correlations of $\rho \leq 0.07$ will lead to conclusive evidence of equivalence to zero. Correlations between $\rho = 0.08$ and $0.22$ will typically result in inconclusive outcomes (possibly statistically significant, but not distinguishable from equivalence).
 
+```{r message=FALSE, warning=FALSE, fig.height = 6, fig.cap = "Power analysis for detecting or rejecting a correlation of $\rho = 0.30$. **(A)** Simulated observed correlations assuming the true population value is $\rho = 0$ (i.e., the null hypothesis is true). Orange bars indicate cases where the 90% confidence interval (CI) falls entirely within the equivalence bounds (±0.15), allowing equivalence to be concluded. Gray bars are inconclusive. **(B)** Simulated observed correlations assuming the true population correlation is $\rho = 0.3$. Green bars indicate clear positive effects (lower bound of the 90% CI > 0.15), red bars show nonsignificant results (CI overlaps 0), and gray bars represent inconclusive outcomes (CI lies entirely above 0 but also within the equivalence bounds)."}
+# Panel B: Simulated outcomes under $\rho$ = 0
+set.seed(123)
+z_sim_0 <- rnorm(n_sim, mean = atanh(0), sd = 1 / sqrt(final_sample_size_st2 - 3))
+r_sim_0 <- tanh(z_sim_0)
+ci_low_0 <- tanh(z_sim_0 - qnorm(1 - alpha) * (1 / sqrt(final_sample_size_st2 - 3)))
+ci_high_0 <- tanh(z_sim_0 + qnorm(1 - alpha) * (1 / sqrt(final_sample_size_st2 - 3)))
+equiv_0 <- ci_low_0 > -eq_bounds & ci_high_0 < eq_bounds
+
+df_sim_0 <- tibble(r_obs = r_sim_0, equiv = equiv_0)
+
+# Panel C: Simulated positive detections under $\rho$ = 0.3
+# Simulate observed correlations for true $\rho$ = 0.3
+z_sim_3 <- rnorm(n_sim, mean = atanh(0.3), sd = 1 / sqrt(final_sample_size_st2 - 3))
+r_sim_3 <- tanh(z_sim_3)
+
+# Compute 90% CI
+se_z <- 1 / sqrt(final_sample_size_st2 - 3)
+ci_low_3 <- tanh(z_sim_3 - qnorm(1 - alpha) * se_z)
+ci_high_3 <- tanh(z_sim_3 + qnorm(1 - alpha) * se_z)
+
+# Classify results
+test_outcome <- case_when(
+  ci_low_3 > eq_bounds ~ "Positive effect",
+  ci_low_3 < 0 & ci_high_3 > 0 ~ "Not significant",
+  TRUE ~ "Inconclusive"
+)
+
+df_sim_3 <- tibble(
+  r_obs = r_sim_3,
+  outcome = factor(test_outcome, 
+                   levels = c("Positive effect", "Inconclusive", "Not significant"))
+)
+
+# Arrange all three plots
+ggarrange(
+  # Panel A: Simulated equivalence under $\rho$ = 0
+  ggplot(df_sim_0, aes(x = r_obs, fill = equiv)) +
+    geom_rect(aes(xmin = -eq_bounds, xmax = eq_bounds, ymin = 0, ymax = Inf),
+              fill = "gray90", alpha = 0.4) +
+    geom_histogram(binwidth = 0.01, center = 0, alpha = 0.8, color = "gray30") +
+    geom_vline(xintercept = c(-eq_bounds, eq_bounds), linetype = "dashed", color = "gray40") +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 10), limits = c(-0.3, 0.3)) +
+    scale_fill_manual(
+      values = c("TRUE" = "#D55E00", "FALSE" = "gray70"),
+      labels = c("Inconclusive", "Equivalence concluded"),
+      name = NULL
+    ) +
+    labs(
+      title = "Simulated Equivalence Test Outcomes ($\rho$ = 0)",
+      subtitle = "Shaded bars show CIs fully within ±0.15 (90% CI)",
+      x = "Observed Correlation (r)",
+      y = "Count"
+    ) +
+    theme_tq(),
+  # Panel B: Simulated non-equivalence under $\rho$ = 0.3
+  ggplot(df_sim_3, aes(x = r_obs, fill = outcome)) +
+    geom_rect(aes(xmin = -eq_bounds, xmax = eq_bounds, ymin = 0, ymax = Inf),
+              fill = "gray90", alpha = 0.4) +
+    geom_histogram(binwidth = 0.01, center = 0, alpha = 0.85, color = "gray30") +
+    geom_vline(xintercept = c(-eq_bounds, eq_bounds), linetype = "dashed", color = "gray40") +
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 10), limits = c(-0.15, 0.45)) +
+    scale_fill_manual(
+      values = c("Positive effect" = "forestgreen", 
+                 "Inconclusive" = "gray70", 
+                 "Not significant" = "red"),
+      name = NULL
+    ) +
+    labs(
+      title = "Simulated Test Outcomes Under $\rho$ = 0.3",
+      subtitle = "Shaded bars show CIs fully within ±0.15 (90% CI)",
+      x = "Observed Correlation (r)",
+      y = "Count"
+    ) +
+    theme_tq(),
+  labels = "AUTO",
+  nrow = 1,
+  common.legend = FALSE
+)
+```
 
 
 ----------------------------------------------------------------------
