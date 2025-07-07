@@ -246,10 +246,10 @@ plot_data <- simulated_data |>
   )
 
 # Labels for facets
-label_f0_mean <- c("Low" = "italic(f)[0]*' mean'", 
-                   "High" = "italic(f)[0]*' mean'")
-label_Df <- c("Low" = "italic(D)[f]", 
-              "High" = "italic(D)[f]")
+label_f0_mean <- c("Low" = "'Low '*italic(f)[0]*' mean'", 
+                   "High" = "'High '*italic(f)[0]*' mean'")
+label_Df <- c("Low" = "'Low '*italic(D)[f]", 
+              "High" = "'High '*italic(D)[f]")
 
 # Raincloud plot
 ggplot(plot_data, aes(x = f0_sd, y = fixation_time, fill = f0_sd)) +
@@ -360,7 +360,7 @@ plan(multisession)  # Parallel if available
 
 power_results <- map_dfr(
   sample_sizes,
-  ~ run_power_sim(simulated_data, n_sample = .x, n_sim = 10),
+  ~ run_power_sim(simulated_data, n_sample = .x, n_sim = 1000),
   .id = "sample_step"
 ) |> 
   mutate(term = factor(term, levels = term_order))
@@ -449,10 +449,12 @@ ggarrange(
       y = "Estimated Power"
     ) +
     theme_tq() +
-    facet_wrap(~term, labeller = as_labeller(term_labels, label_parsed)),
+    facet_wrap(~term, labeller = as_labeller(term_labels, label_parsed),
+               nrow = 1),
   labels = "AUTO",
   common.legend = TRUE,
-  legend = "bottom"
+  legend = "bottom",
+  nrow = 2
 )
 ```
 
@@ -471,7 +473,7 @@ Therefore, $n$ = `r final_sample_size_st1` participants would reliably detect al
 
 Below we visualize the distribution of p-values at the final sample size for all effects, illustrating expected Type I/II error profiles.
 
-```{r message = FALSE, warning = FALSE, fig.cap = "Distribution of $p$-values across simulations at $n$ = `r final_sample_size_st1`. This figure shows the $p$-value distribution for each effect, based on 1000 simulation runs using the final recommended sample size. Main effects show a strong skew toward low $p$-values, consistent with high power. Interactions yield more uniform distributions, indicating limited sensitivity to detect those effects at this sample size."}
+```{r message = FALSE, warning = FALSE, fig.cap = paste0("Distribution of $p$-values across simulations at $n$ = ", final_sample_size_st1, ". This figure shows the $p$-value distribution for each effect, based on 1000 simulation runs using the final recommended sample size. Main effects show a strong skew toward low $p$-values, consistent with high power. Interactions yield more uniform distributions, indicating limited sensitivity to detect those effects at this sample size.")}
 # Filter for final n
 final_power <- power_summ |> 
   filter(n_sample == final_sample_size_st1)
@@ -490,11 +492,12 @@ int_power_results <- power_results |>
 
 # Plot distributions
 ggarrange(
-  ggplot(main_power_results, aes(x = p_value, fill = signif, colour = signif)) +
+  ggplot(main_power_results, aes(x = p_value, fill = signif)) +
     geom_histogram(
       bins = 100,
       breaks = seq(0, 1, 0.01),
-      alpha = 0.8
+      alpha = 0.8,
+      colour = NA 
     ) +
     geom_text(
       data = main_power_results |> distinct(term, power),
@@ -509,21 +512,22 @@ ggarrange(
       x = "p-value",
       y = "Count",
       fill = "Significance",
-      title = "Distribution of p values for Main Effects"
+      title = "Distribution of p values for Interactions"
     ) +
-    scale_fill_hue(direction = -1) +
-    scale_colour_hue(direction = -1) +
+    scale_fill_tq(name = "Significance") +
     scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
     facet_wrap(~term, labeller = as_labeller(term_labels, label_parsed)) +
-    scale_colour_tq() +
-    scale_fill_tq() +
     theme_tq() +
-    guides(fill = guide_legend(reverse = TRUE)),
-  ggplot(int_power_results, aes(x = p_value, fill = signif, colour = signif)) +
+    guides(
+      fill = guide_legend(override.aes = list(colour = NA), reverse = TRUE),
+      colour = "none"
+    ),
+  ggplot(int_power_results, aes(x = p_value, fill = signif)) +
     geom_histogram(
       bins = 100,
       breaks = seq(0, 1, 0.01),
-      alpha = 0.8
+      alpha = 0.8,
+      colour = NA 
     ) +
     geom_text(
       data = int_power_results |> distinct(term, power),
@@ -540,17 +544,19 @@ ggarrange(
       fill = "Significance",
       title = "Distribution of p values for Interactions"
     ) +
-    scale_fill_hue(direction = -1) +
-    scale_colour_hue(direction = -1) +
+    scale_fill_tq(name = "Significance") +
     scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
-    facet_wrap(~term, labeller = as_labeller(term_labels, label_parsed)) +
-    scale_colour_tq() +
-    scale_fill_tq() +
+    facet_wrap(~term, labeller = as_labeller(term_labels, label_parsed),
+               nrow = 1) +
     theme_tq() +
-    guides(fill = guide_legend(reverse = TRUE)),
+    guides(
+      fill = guide_legend(override.aes = list(colour = NA), reverse = TRUE),
+      colour = "none"
+    ),
   labels = "AUTO",
   common.legend = TRUE,
-  legend = "bottom"
+  legend = "bottom",
+  nrow = 2
 )
 ```
 
@@ -571,7 +577,7 @@ This section reports a power analysis for Study 2, which investigates the relati
 
 We used the `TOSTER::power_z_cor()` function to compute power analytically across a range of sample sizes [@tostercit1; @tostercit2].
 
-```{r message=FALSE, warning=FALSE, fig.height = 6, fig.width = 8, fig.cap = "Power curves for detecting a positive correlation (gray line) and for concluding statistical equivalence to zero (red line) across different sample sizes. Dashed and dotted lines represent 80% and 90% power thresholds, respectively. Vertical dotted lines represents the sample size where power reaches $1 - \\beta$ = 0.9."}
+```{r message=FALSE, warning=FALSE, fig.height = 4, fig.width = 6, fig.cap = "Power curves for detecting a positive correlation (gray line) and for concluding statistical equivalence to zero (red line) across different sample sizes. Dashed horizontal lines represent 80% and 90% power thresholds. Vertical dotted lines represents the sample size where power reaches $1 - \\beta$ = 0.9."}
 # Parameters
 eq_bounds <- 0.15
 rho_pop <- 0.30
@@ -579,7 +585,7 @@ alpha <- 0.05
 n_sim <- 100000
 
 # Panel A: Power curves
-sample_sizes <- 5:600
+sample_sizes <- seq(10, 600, by = 10)
 
 power_detect <- map_dbl(sample_sizes, ~
                           power_z_cor(
@@ -626,19 +632,20 @@ p_sample_size_st2 <- power_df |>
 
 # Power curves
 ggplot(power_df, aes(x = n, y = Power, color = Test)) +
-  geom_line(linewidth = 1) +
+  geom_line(linewidth = 0.5) +
+  geom_point(size = 1) +
   geom_hline(yintercept = 0.8, linetype = "dashed") +
-  geom_hline(yintercept = 0.9, linetype = "dotted") +
-  geom_vline(xintercept = final_sample_size_st2, colour = "#E31A1C") +
+  geom_hline(yintercept = 0.9, linetype = "dashed") +
+  geom_vline(xintercept = final_sample_size_st2, colour = "#E31A1C", linetype = "dotted") +
   annotate("text", y = 0.5, x = final_sample_size_st2,
            label = bquote(italic(n) == .(final_sample_size_st2)),
            hjust = 0.5, vjust = 1.3, angle = 90,
-           color = "#E31A1C", size = 3) +
-  geom_vline(xintercept = p_sample_size_st2, colour = "#2c3e50") +
+           color = "#E31A1C", size = 2.5) +
+  geom_vline(xintercept = p_sample_size_st2, colour = "#2c3e50", linetype = "dotted") +
   annotate("text", y = 0.5, x = p_sample_size_st2,
            label = bquote(italic(n) == .(p_sample_size_st2)),
            hjust = 0.5, vjust = 1.3, angle = 90,
-           color = "#2c3e50", size = 3) +
+           color = "#2c3e50", size = 2.5) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   labs(
     title = "Power Curves for Correlation Detection and Equivalence Testing",
