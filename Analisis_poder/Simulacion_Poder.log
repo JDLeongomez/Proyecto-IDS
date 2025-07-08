@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.7.4)  7 JUL 2025 19:55
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.7.4)  8 JUL 2025 08:49
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1392,78 +1392,88 @@ Package pdftex.def Info: Simulacion_Poder_files/figure-latex/unnamed-chunk-9-1.p
 
 
 [16 <./Simulacion_Poder_files/figure-latex/unnamed-chunk-9-1.pdf>]
-Underfull \vbox (badness 10000) detected at line 1036
+Underfull \vbox (badness 10000) detected at line 1068
  []
 
 
 
 [17]
-<Simulacion_Poder_files/figure-latex/unnamed-chunk-10-1.pdf, id=216, 867.24pt x 325.215pt>
+Underfull \vbox (badness 10000) detected at line 1068
+ []
+
+
+Underfull \vbox (badness 10000) detected at line 1068
+ []
+
+
+
+[18]
+<Simulacion_Poder_files/figure-latex/unnamed-chunk-10-1.pdf, id=220, 867.24pt x 325.215pt>
 File: Simulacion_Poder_files/figure-latex/unnamed-chunk-10-1.pdf Graphic file (type pdf)
 <use Simulacion_Poder_files/figure-latex/unnamed-chunk-10-1.pdf>
-Package pdftex.def Info: Simulacion_Poder_files/figure-latex/unnamed-chunk-10-1.pdf  used on input line 1040.
+Package pdftex.def Info: Simulacion_Poder_files/figure-latex/unnamed-chunk-10-1.pdf  used on input line 1072.
 (pdftex.def)             Requested size: 867.2379pt x 325.2142pt.
 
-
-[18 <./Simulacion_Poder_files/figure-latex/unnamed-chunk-10-1.pdf>]
-Underfull \hbox (badness 4328) in paragraph at lines 1060--1062
+Underfull \hbox (badness 4328) in paragraph at lines 1092--1094
 \T1/lmr/m/it/10 14)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 tidy-quant(v.1.0.11)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 gg-dist(v.3.3.3)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 lu-bri-da-te(v.1.9.4)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 for-cats(v.1.0.0)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 stringr(v.1.5.1)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 dplyr(v.1.1.4)\T1/lmr/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 2351) in paragraph at lines 1063--1065
+Underfull \hbox (badness 2351) in paragraph at lines 1095--1097
 []\T1/lmr/bx/n/10 loaded via a na-mes-pa-ce (and not at-ta-ched): \T1/lmr/m/it/10 Rd-pack(v.2.6.4)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 gri-dEx-tra(v.2.3)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 sandwich(v.3.1-1)\T1/lmr/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 4416) in paragraph at lines 1063--1065
+Underfull \hbox (badness 4416) in paragraph at lines 1095--1097
 \T1/lmr/m/it/10 rlang(v.1.1.6)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 ma-grittr(v.2.0.3)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 multcomp(v.1.4-28)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 com-pi-ler(v.4.5.1)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 sys-tem-fonts(v.1.2.3)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 vctrs(v.0.6.5)\T1/lmr/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 7925) in paragraph at lines 1063--1065
+Underfull \hbox (badness 7925) in paragraph at lines 1095--1097
 \T1/lmr/m/it/10 tzdb(v.0.5.0)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 nloptr(v.2.2.1)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 xfun(v.0.52)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 broom(v.1.0.8)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 pa-ra-llel(v.4.5.1)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 R6(v.2.6.1)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 strin-gi(v.1.8.7)\T1/lmr/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 5908) in paragraph at lines 1063--1065
+Underfull \hbox (badness 5908) in paragraph at lines 1095--1097
 \T1/lmr/m/it/10 RColorBrewer(v.1.1-3)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 pa-ra-llelly(v.1.45.0)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 car(v.3.1-3)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 boot(v.1.3-31)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 numDeriv(v.2016.8-1.1)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 es-ti-ma-bi-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1063--1065
+Underfull \hbox (badness 10000) in paragraph at lines 1095--1097
 \T1/lmr/m/it/10 lattice(v.0.22-7)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 withr(v.3.0.2)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 ba-yes-testR(v.0.15.2)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 coda(v.0.19-4.1)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 eva-lua-te(v.1.0.4)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 survival(v.3.8-3)\T1/lmr/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 3302) in paragraph at lines 1063--1065
+Underfull \hbox (badness 3302) in paragraph at lines 1095--1097
 \T1/lmr/m/it/10 xml2(v.1.3.8)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 pi-llar(v.1.10.2)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 carData(v.3.0-5)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 re-for-mu-las(v.0.4.0)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 in-sight(v.1.1.0)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 dis-tri-bu-tio-nal(v.0.5.0)\T1/lmr/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1063--1065
+Underfull \hbox (badness 10000) in paragraph at lines 1095--1097
 \T1/lmr/m/it/10 tools(v.4.5.1)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 gg-sig-nif(v.0.6.4)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 mvtnorm(v.1.3-3)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 cow-plot(v.1.1.3)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 grid(v.4.5.1)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 rbi-bu-tils(v.2.3)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 RobS-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1063--1065
+Underfull \hbox (badness 10000) in paragraph at lines 1095--1097
 \T1/lmr/m/it/10 tatTM(v.1.0.11)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 da-ta-wi-zard(v.1.0.2)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 nlme(v.3.1-168)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 Formula(v.1.2-5)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 cli(v.3.6.5)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 tex-tsha-ping(v.1.0.1)\T1/lmr/m/n/10 ,
  []
 
 
-Underfull \hbox (badness 3701) in paragraph at lines 1063--1065
+Underfull \hbox (badness 3701) in paragraph at lines 1095--1097
 \T1/lmr/m/it/10 vi-ri-dis-Li-te(v.0.4.2)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 sv-gli-te(v.2.2.1)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 gta-ble(v.0.3.6)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 rs-ta-tix(v.0.7.2)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 di-gest(v.0.6.37)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 TH.data(v.1.1-3)\T1/lmr/m/n/10 , \T1/lmr/m/it/10 far-
  []
 
 
 
+[19 <./Simulacion_Poder_files/figure-latex/unnamed-chunk-10-1.pdf>]
 
 
 
 
 
 
-[19] (./Simulacion_Poder.aux
+
+[20] (./Simulacion_Poder.aux
 LaTeX Info: Redefining \sptext on input line 13.
 LaTeX Info: Redefining \. on input line 13.
 LaTeX Info: Redefining \% on input line 13.
@@ -1477,18 +1487,18 @@ Package logreq Info: Writing requests to 'Simulacion_Poder.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 37154 strings out of 469810
- 699088 string characters out of 5482837
- 1751109 words of memory out of 5000000
+ 37155 strings out of 469810
+ 699095 string characters out of 5482837
+ 1749325 words of memory out of 5000000
  64782 multiletter control sequences out of 15000+600000
  703309 words of font info for 92 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  84i,13n,87p,2098b,2816s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbxi10.pfb></home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi5.pfb></home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi7.pfb></home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri12.pfb></home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></home/jdl/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on Simulacion_Poder.pdf (19 pages, 5000551 bytes).
+Output written on Simulacion_Poder.pdf (20 pages, 4981625 bytes).
 PDF statistics:
- 412 PDF objects out of 1000 (max. 8388607)
- 341 compressed objects within 4 object streams
- 62 named destinations out of 1000 (max. 500000)
+ 417 PDF objects out of 1000 (max. 8388607)
+ 345 compressed objects within 4 object streams
+ 63 named destinations out of 1000 (max. 500000)
  174 words of extra memory for PDF output out of 10000 (max. 10000000)
 

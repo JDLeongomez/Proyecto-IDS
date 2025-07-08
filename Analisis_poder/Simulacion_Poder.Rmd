@@ -731,14 +731,14 @@ ggplot(power_df, aes(x = n, y = Power, color = Test)) +
   geom_point(size = 1) + # Puntos individuales
   geom_hline(yintercept = 0.8, linetype = "dashed") + # Línea de referencia: 80%
   geom_hline(yintercept = 0.9, linetype = "dashed") + # Línea de referencia: 90%
-  geom_vline(xintercept = final_sample_size_st2, colour = "#E31A1C", linetype = "dotted") + # Línea vertical: equivalencia
+  geom_vline(xintercept = final_sample_size_st2, colour = "#E31A1C", linetype = "dotted") +
   annotate("text",
     y = 0.5, x = final_sample_size_st2,
     label = bquote(italic(n) == .(final_sample_size_st2)),
     hjust = 0.5, vjust = 1.3, angle = 90,
     color = "#E31A1C", size = 2.5
   ) +
-  geom_vline(xintercept = p_sample_size_st2, colour = "#2c3e50", linetype = "dotted") + # Línea vertical: detección
+  geom_vline(xintercept = p_sample_size_st2, colour = "#2c3e50", linetype = "dotted") +
   annotate("text",
     y = 0.5, x = p_sample_size_st2,
     label = bquote(italic(n) == .(p_sample_size_st2)),
@@ -759,7 +759,7 @@ ggplot(power_df, aes(x = n, y = Power, color = Test)) +
 
 En general, con una muestra de 477 participantes, correlaciones de $\rho \geq 0.23$ permiten concluir un efecto positivo distinto de cero; correlaciones de $\rho \leq 0.07$ llevan a concluir equivalencia con cero. Correlaciones entre $\rho = 0.08$ y $0.22$ tienden a producir resultados inconclusos (posiblemente significativos, pero también equivalentes a cero).
 
-```{r message=FALSE, warning=FALSE, fig.height = 4.5, fig.cap = "Análisis de poder para detectar o rechazar una correlación de $\\rho = 0{,}30$. **(A)** Correlaciones observadas simuladas asumiendo que el valor poblacional verdadero es $\\rho = 0$ (es decir, bajo la hipótesis nula). Las barras naranjas indican casos en los que el intervalo de confianza (IC) del 90% cae completamente dentro de los límites de equivalencia (±0.15), permitiendo concluir equivalencia. Las barras grises representan resultados inconclusos. **(B)** Correlaciones observadas simuladas asumiendo que la correlación poblacional verdadera es $\\rho = 0{,}3$. Las barras verdes indican efectos positivos claros (el límite inferior del IC del 90% > 0.15), las rojas muestran resultados no significativos (el IC incluye el 0) y las grises representan resultados inconclusos (el IC está completamente por encima de 0 pero dentro de los límites de equivalencia)."}
+```{r message=FALSE, warning=FALSE, fig.height = 4.5, fig.cap = "Análisis de poder para detectar o rechazar una correlación de $\\rho = 0.30$. **(A)** Correlaciones observadas simuladas asumiendo que el valor poblacional verdadero es $\\rho = 0$ (es decir, bajo la hipótesis nula). Las barras naranjas indican casos en los que el intervalo de confianza (IC) del 90% cae completamente dentro de los límites de equivalencia (±0.15), permitiendo concluir equivalencia. Las barras grises representan resultados inconclusos. **(B)** Correlaciones observadas simuladas asumiendo que la correlación poblacional verdadera es $\\rho = 0.3$. Las barras verdes indican efectos positivos claros (el límite inferior del IC del 90% > 0.15), las rojas muestran resultados no significativos (el IC incluye el 0) y las grises representan resultados inconclusos (el IC está completamente por encima de 0 pero dentro de los límites de equivalencia). En ambos paneles, la banda sombreada y la etiqueta \\textit{Equivalente a 0} indican la región definida por los límites de equivalencia, y los porcentajes de probabilidad de cada resultado se muestran en el margen izquierdo."}
 # Panel A: Resultados simulados bajo rho = 0
 set.seed(123)
 z_sim_0 <- rnorm(n_sim, mean = atanh(0), sd = 1 / sqrt(final_sample_size_st2 - 3))
@@ -794,16 +794,41 @@ df_sim_3 <- tibble(
   )
 )
 
-# Graficamos ambos paneles
+# Cálculo de porcentajes por categoría con columnas x e y para texto
+df_sim_0_summary <- df_sim_0 |>
+  count(equiv) |>
+  mutate(
+    perc = scales::percent(n / sum(n), accuracy = 1),
+    label = ifelse(equiv, "Equivalencia concluida", "Inconcluso"),
+    colour = ifelse(equiv, "#D55E00", "gray40"),
+    x = -0.30,  # coordenada horizontal para colocar el texto
+    y = c(8500, 9000)  # ajusta si es necesario según altura de barras
+  )
+
+df_sim_3_summary <- df_sim_3 |>
+  count(outcome) |>
+  mutate(
+    perc = scales::percent(n / sum(n), accuracy = 1),
+    colour = case_when(
+      outcome == "Efecto positivo" ~ "forestgreen",
+      outcome == "Inconcluso" ~ "gray40"
+    ),
+    x = -0.13,
+    y = c(9000, 8500)
+  )
+
+# Figura corregida
 ggarrange(
-  # Panel A: Resultados del test de equivalencia bajo rho = 0
+  # Panel A
   ggplot(df_sim_0, aes(x = r_obs, fill = equiv)) +
-    geom_rect(aes(xmin = -eq_bounds, xmax = eq_bounds, ymin = 0, ymax = Inf),
-      fill = "gray90", alpha = 0.4
-    ) +
+    annotate("rect", xmin = -eq_bounds, xmax = eq_bounds, ymin = 0, ymax = Inf,
+             fill = "gray90", alpha = 0.4) +
+    annotate("text", x = 0, y = Inf, label = "Equivalente a 0", vjust = 1.5, fontface = "italic", colour = "gray40") +
     geom_histogram(binwidth = 0.01, center = 0, alpha = 0.8, color = "gray30") +
     geom_vline(xintercept = c(-eq_bounds, eq_bounds), linetype = "dashed", color = "gray40") +
-    geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+    geom_text(data = df_sim_0_summary, aes(x = x, y = y, label = paste(label, ":", perc), colour = colour),
+              inherit.aes = FALSE, hjust = 0) +
+    scale_colour_identity() +
     scale_x_continuous(breaks = scales::pretty_breaks(n = 10), limits = c(-0.3, 0.3)) +
     scale_fill_manual(
       values = c("TRUE" = "#D55E00", "FALSE" = "gray70"),
@@ -816,14 +841,19 @@ ggarrange(
       x = "Correlación observada (r)",
       y = "Frecuencia"
     ) +
+    ylim(c(0, 10000)) +
     theme_tq(),
-  # Panel B: Resultados simulados bajo rho = 0.3
+  
+  # Panel B
   ggplot(df_sim_3, aes(x = r_obs, fill = outcome)) +
-    geom_rect(aes(xmin = -eq_bounds, xmax = eq_bounds, ymin = 0, ymax = Inf),
-      fill = "gray90", alpha = 0.4
-    ) +
+    annotate("rect", xmin = -eq_bounds, xmax = eq_bounds, ymin = 0, ymax = Inf,
+             fill = "gray90", alpha = 0.4) +
+    annotate("text", x = 0, y = Inf, label = "Equivalente a 0", vjust = 1.5, fontface = "italic", colour = "gray40") +
     geom_histogram(binwidth = 0.01, center = 0, alpha = 0.85, color = "gray30") +
     geom_vline(xintercept = c(-eq_bounds, eq_bounds), linetype = "dashed", color = "gray40") +
+    geom_text(data = df_sim_3_summary, aes(x = x, y = y, label = paste(outcome, ":", perc), colour = colour),
+              inherit.aes = FALSE, hjust = 0) +
+    scale_colour_identity() +
     scale_x_continuous(breaks = scales::pretty_breaks(n = 10), limits = c(-0.15, 0.45)) +
     scale_fill_manual(
       values = c(
@@ -839,7 +869,9 @@ ggarrange(
       x = "Correlación observada (r)",
       y = "Frecuencia"
     ) +
+    ylim(c(0, 10000)) +
     theme_tq(),
+  
   labels = "AUTO",
   nrow = 1,
   common.legend = FALSE
