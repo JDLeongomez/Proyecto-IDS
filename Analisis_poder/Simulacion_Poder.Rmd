@@ -91,7 +91,7 @@ En el \textbf{Estudio 2} examinamos la relación entre variables acústicas del 
 
 Este documento incluye todo el código y explicaciones paso a paso de los análisis, figuras y tablas (incluyendo figuras y tablas suplementarias) correspondientes al análisis de poder basado en simulaciones para el proyecto \textbf{\textit{Funciones evolutivas del habla dirigida a bebés: Impacto en la atención, las preferencias auditivas y el desarrollo lingüístico y musical temprano}}.
 
-El código completo está disponible en el Open Science Framework (OSF): \colorbox{pink}{https://doi.org/10.XXXXXX}. La estrategia de análisis de poder y los análisis/modelos principales fueron diseñados por Juan David Leongómez. Este documento y todo su código subyacente fueron elaborados en R Markdown por Juan David Leongómez utilizando R y \LaTeX.
+El código completo está disponible en GitHub: \url{https://github.com/JDLeongomez/Proyecto-IDS/tree/master/Analisis_poder}. La estrategia de análisis de poder y los análisis/modelos principales fueron diseñados por Juan David Leongómez. Este documento y todo su código subyacente fueron elaborados en R Markdown por Juan David Leongómez utilizando R y \LaTeX.
 
 ------------------------------------------------------------------------
 
