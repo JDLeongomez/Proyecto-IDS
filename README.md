@@ -64,7 +64,7 @@ Este repositorio contiene los materiales asociados a la propuesta de investigaci
 ## Licencia
 
 Este repositorio y sus contenidos están destinados únicamente a fines académicos.  
-El código y materiales reproducibles pueden compartirse bajo licencia [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/), salvo donde se indique lo contrario.  
+El código y materiales reproducibles pueden compartirse bajo licencia [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/deed.es), salvo donde se indique lo contrario.  
 
 ---
 
