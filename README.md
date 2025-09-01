@@ -35,7 +35,6 @@ Este repositorio contiene los materiales asociados a la propuesta de investigaci
 │   ├── Files
 │   ├── Simulacion_Poder_cache
 │   ├── Simulacion_Poder_files
-│   ├── Simulacion_Poder.log
 │   ├── Simulacion_Poder.pdf
 │   └── Simulacion_Poder.Rmd
 ├── Documentos de soporte
@@ -43,6 +42,9 @@ Este repositorio contiene los materiales asociados a la propuesta de investigaci
 │   ├── Cronograma
 │   ├── Documentos convocatoria
 │   ├── Ideas
+│   │   ├── Espectrograma
+│   │   ├── Logo
+│   │   └── Medición musicalidad
 │   └── Resumen
 ├── Investigadores y Hojas de Vida
 │   ├── Cartas de aval
