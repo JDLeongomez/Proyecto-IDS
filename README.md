@@ -14,7 +14,7 @@ Este repositorio contiene los materiales asociados a la propuesta de investigaci
 - **Propuesta/**  
   Versión final de la propuesta y anexos oficiales: formato de investigación avanzada, presupuesto, cartas de aval y consentimientos informados de los estudios. 
 
-- **Investigadores y Hojas de Vida/**  
+- **Equipo/**  
   Información del equipo de investigación: hojas de vida, cartas de aval, certificados de ética y archivo resumen del equipo (`Equipo.xlsx`).
 
 - **Analisis_poder/**  
@@ -46,7 +46,7 @@ Este repositorio contiene los materiales asociados a la propuesta de investigaci
 │   │   ├── 📂 Logo
 │   │   └── 📂 Medición musicalidad
 │   └── 📂 Resumen
-📂 Investigadores y Hojas de Vida
+📂 Equipo
 │   ├── 📂 Cartas de aval
 │   ├── 📂 Certificados Ética
 │   ├── 📂 HVs
