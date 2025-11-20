@@ -4,7 +4,7 @@
 Este repositorio contiene los materiales asociados a la propuesta de investigación *Funciones evolutivas del habla dirigida a bebés: Impacto en la atención, las preferencias auditivas y el desarrollo lingüístico y musical temprano*.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/JDLeongomez/Proyecto-IDS/refs/heads/master/Documentos%20de%20soporte/Ideas/Logo/logo_preview.svg" width="300">
+  <img src="https://raw.githubusercontent.com/JDLeongomez/Proyecto-IDS/refs/heads/master/Documentos%20de%20soporte/Ideas/Logo/logo_preview.png" width="300">
 </p>
 
 ---
