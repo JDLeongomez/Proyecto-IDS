@@ -53,6 +53,7 @@ Este repositorio contiene los materiales asociados a la propuesta de investigaci
 │   └── 📊 Equipo.xlsx
 📂 Ética
 │   ├── 📂 R0
+│   ├── 📂 R1
 📂 Propuesta
 │   ├── 📑 Anexo1_Cartas_de_aval_UA_COMBINADAS.pdf
 │   ├── 📑 Anexo2_Formato_propuesta_investigacion_avanzada.pdf
