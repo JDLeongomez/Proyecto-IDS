@@ -83,12 +83,13 @@ knitr:
 
 ## Description {.unnumbered}
 
-This document presents the simulation-based power analysis for the registered report *Babies' acoustic preferences in infant-directed speech*. This study uses a 2×2×2 fully crossed within-subjects design to examine the effects of three independently manipulated acoustic properties of infant-directed speech (IDS), mean fundamental frequency ($f_0$ mean), pitch variability ($f_0$ SD), and formant
-dispersion ($D_f$), on total fixation time (ms) in pre-linguistic infants aged 3–9 months.
+This document presents the simulation-based power analysis for the registered report *Babies' acoustic preferences in infant-directed speech*. This study uses a 2×2×2 fully crossed within-subjects design to examine the effects of three independently manipulated acoustic properties of infant-directed speech (IDS), mean fundamental frequency ($f_0$ mean), pitch variability ($f_0$ SD), and formant dispersion ($D_f$), on total fixation time (ms) in pre-linguistic infants aged 3–9 months.
 
 The primary statistical model is a linear mixed model (LMM):
 
-$$\texttt{fixation\_time} \sim f_0\text{ SD} \times f_0\text{ mean} \times D_f + (1 \mid \text{ID})$$
+$$\texttt{fixation\_time} \sim f_0\text{ SD} \times f_0\text{ mean} \times D_f + \texttt{block} + \texttt{avatar} + (1 + \texttt{avatar} \mid\mid \text{ID}) + (1 \mid \text{original})$$
+
+For computational tractability, the simulation uses a simplified version of this model — $\texttt{fixation\_time} \sim f_0\text{ SD} \times f_0\text{ mean} \times D_f + (1 \mid \text{ID})$ — which omits the additional fixed and random effects. This simplification is conservative for the reasons described at the end of this section.
 
 Three complementary analyses are presented here:
 
@@ -112,9 +113,7 @@ Three complementary analyses are presented here:
    Practical Equivalence (ROPE: ±150 ms) is computed using
    `bayestestR::equivalence_test()`, serving as a secondary robustness check.
 
-> **Note on Bayesian simulation count.** `n_sim_bayes` is currently set to 10 for
-> rapid verification. Increase to 100–200 for the final submission; no other code
-> changes are required.
+The simulation assumes one observation per condition per participant and a single stimulus source. The actual design includes two blocks, yielding two observations per condition per participant, which halves the variance of each `emmeans` contrast, reducing the SE by a factor of approximately $\sqrt{2}$ relative to the simulated design. The simulation additionally omits random effects for original voice recordings $(1 \mid \text{original})$ and the by-participant avatar slope $(1 + \texttt{avatar} \mid\mid \text{ID})$, which introduce additional variance not captured here. The net power estimates are therefore conservative: the doubling of within-participant observations substantially outweighs the additional variance from the expanded random-effects structure, and the reported power curves should be treated as lower bounds on the power of the actual design.
 
 **Reproducibility.** All code, seeds, and parameters are documented here. The
 complete source file is available at: <https://github.com/JDLeongomez/Proyecto-IDS>
@@ -128,7 +127,7 @@ All packages are available from CRAN. The analysis uses the `tidyverse` ecosyste
 LMMs with Satterthwaite degrees of freedom and $p$-values, `emmeans` [@emmeanscit]
 for marginal contrasts and confidence intervals, `effectsize` [@effectsizecit] for
 partial $\omega^2$ estimates, `furrr` [@furrrcit] for parallel Monte Carlo sampling,
-`brms` [@brmscit1; @brmscit2] for Bayesian LMMs via Stan, and `bayestestR`
+`brms` [@brmscit] for Bayesian LMMs via Stan, and `bayestestR`
 [@bayestestRcit] for ROPE-based equivalence testing. Visualisation uses `ggdist`
 [@ggdistcit1; @ggdistcit2], `tidyquant` [@tidyquantcit], `ggpubr` [@ggpubrcit],
 and `tinytable` [@tinytablecit] for publication-quality tables. The Bayesian models are compiled and sampled via cmdstanr [@cmdstanrcit], which provides an R interface to CmdStan and is used as the backend for brms.
@@ -281,8 +280,10 @@ correct conditional probability.
 The same bounds define the ROPE for the Bayesian sensitivity analysis. Weakly
 informative priors place no strong prior mass near zero, so high ROPE percentages
 reflect genuine posterior evidence for equivalence. Following
-@kruschkeDoingBayesianData2015, we report both the ROPE percentage and whether the
-`r ci_level * 100`% HDI falls entirely within the ROPE (strong equivalence).
+[@kruschkeDoingBayesianData2015], we report both the ROPE percentage and whether the
+`r ci_level * 100`% Highest Density Interval (HDI) [@kruschkeDoingBayesianData2015;
+@bayestestRcit] falls entirely within the ROPE (strong
+equivalence).
 
 \newpage
 
@@ -858,7 +859,11 @@ detect_at_target |>
       term == "f0_mean" ~ "$f_0$ mean (H2)",
       term == "Df"      ~ "$D_f$ (H3)"
     ),
-    `Expected effect`  = paste0(c(eff_f0sd, eff_f0mean, eff_Df), " ms"),
+    `Expected effect` = case_when(
+      term == "f0_sd"   ~ paste0(eff_f0sd,   " ms"),
+      term == "f0_mean" ~ paste0(eff_f0mean, " ms"),
+      term == "Df"      ~ paste0(eff_Df,     " ms")
+    ),
     `Detection power`  = paste0(round(power_detect * 100, 1), "\\%"),
     `Equiv. power`     = paste0(round(power_equiv  * 100, 1), "\\%"),
     `Min $n$ (80\\% det.)` = n_80_det
@@ -1042,12 +1047,20 @@ bayes_h0 <- run_bayes_sim(
 ## Results: ROPE Percentages and Posterior Summaries
 
 ```{r}
+#| include: false
+
+cap_bayes_rope_tbl <- paste0(
+  "Bayesian ROPE analysis across ", n_sim_bayes, 
+  " simulations per population at $n = ", target_n, 
+  "$. Under H$_1$ (real effects), ROPE percentages should be low ",
+  "(posteriors outside the ROPE). Under H$_0$ (null effects), ",
+  "ROPE percentages should be high (posteriors within the ROPE)."
+)
+```
+
+```{r}
 #| label: tbl-bayes-rope
-#| tbl-cap: >
-#|   Bayesian ROPE analysis across `r n_sim_bayes` simulations per population at
-#|   $n = `r target_n`$. Under H$_1$ (real effects), ROPE percentages should be low
-#|   (posteriors outside the ROPE). Under H$_0$ (null effects), ROPE percentages
-#|   should be high (posteriors within the ROPE).
+#| tbl-cap: !expr cap_bayes_rope_tbl
 
 format_bayes_row <- function(dat, pop_label) {
   dat |>
@@ -1084,7 +1097,7 @@ bind_rows(
        "HDI in ROPE = entire ", ci_level * 100, 
        "\\% HDI within ROPE (strong equivalence). ",
        "Based on $n_{\\text{sim}} = ", n_sim_bayes,
-       "$ simulations; increase to 100--200 for the final submission.")) |>
+       "$ simulations.")) |>
   style_tt(align = "llccc") |> 
   format_tt(escape = FALSE)
 ```
@@ -1177,14 +1190,22 @@ ggarrange(p_post, p_rope_pct,
 # Overall Summary {#sec-summary}
 
 ```{r}
+#| include: false
+
+cap_tbl_final_summary <- paste0(
+  "Power summary for the study at the pre-specified target sample size
+  ($n = ", target_n, "$). Detection power is from H$_1$ Monte Carlo simulations;
+  equivalence power from H$_0$ simulations. The study is well powered for
+  detection of all three confirmatory effects. Equivalence power is modest but
+  transparent, reflecting the high trial-level noise of infant eye-tracking
+  (see @sec-bounds)."
+)
+```
+
+```{r}
 #| label: tbl-final-summary
-#| tbl-cap: >
-#|   Power summary for the study at the pre-specified target sample size
-#|   ($n = `r target_n`$). Detection power is from H$_1$ Monte Carlo simulations;
-#|   equivalence power from H$_0$ simulations. The study is well powered for
-#|   detection of all three confirmatory effects. Equivalence power is modest but
-#|   transparent, reflecting the high trial-level noise of infant eye-tracking
-#|   (see @sec-bounds).
+#| tbl-cap: !expr cap_tbl_final_summary
+
 
 detect_at_target |>
   left_join(equiv_at_target, by = c("term", "n_sample")) |>
@@ -1194,21 +1215,25 @@ detect_at_target |>
       term == "f0_mean" ~ "$f_0$ mean (H2)",
       term == "Df"      ~ "$D_f$ (H3)"
     ),
-    `Expected effect`  = paste0(c(eff_f0sd, eff_f0mean, eff_Df), " ms"),
-    `Detection power`  = paste0(round(power_detect * 100, 1), "%"),
+    `Expected effect` = case_when(
+      term == "f0_sd"   ~ paste0(eff_f0sd,   " ms"),
+      term == "f0_mean" ~ paste0(eff_f0mean, " ms"),
+      term == "Df"      ~ paste0(eff_Df,     " ms")
+    ),
+    `Detection power`  = paste0(round(power_detect * 100, 1), "\\%"),
     `Equiv. bounds`    = paste0("\u00b1", eq_bound, " ms"),
-    `Equiv. power`     = paste0(round(power_equiv  * 100, 1), "%")
+    `Equiv. power`     = paste0(round(power_equiv  * 100, 1), "\\%")
   ) |>
   select(Effect, `Expected effect`, `Detection power`,
          `Equiv. bounds`, `Equiv. power`) |>
-  tt(align = "lcccc",
-     notes = paste0(
+  tt(notes = paste0(
        "\\textit{Note.} Detection power: frequentist LMM, $\\alpha = .05$, 
        from H$_1$ simulations. ",
        "Equivalence power: 90\\% CI within $\\pm ", eq_bound,
        "$ ms, from H$_0$ simulations. ",
        "Bayesian ROPE analysis uses the same bounds; see the Bayesian 
        Sensitivity Analysis section.")) |>
+  tt_style(align = "lcccc") |> 
   format_tt(escape = FALSE)
 ```
 
@@ -1222,7 +1247,7 @@ The simulation confirms that:
   $\sigma \approx `r residual_sd`$ ms. This corresponds to
   `r round(eq_bound / (y_max - y_min) * 100, 0)`% of the total fixation-time
   range and `r round(eq_bound / eff_f0sd * 100, 0)`% of the largest expected main
-  effect [@@simonsohnSmallTelescopes2015; @lakensEquivalenceTestingPsychological2018].
+  effect [@simonsohnSmallTelescopes2015; @lakensEquivalenceTestingPsychological2018].
 - **Equivalence power** at $n$ = `r target_n` is approximately
   `r paste0(round(mean(equiv_at_target$power_equiv) * 100, 0), "%")` on average,
   meeting the 80% target.
