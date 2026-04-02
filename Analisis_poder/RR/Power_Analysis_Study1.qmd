@@ -18,6 +18,8 @@ format:
     cite-method: biblatex
     biblio-style: nature
     number-sections: true
+    tbl-prefix: "S"
+    fig-prefix: "S"
     toc: true
     toc-depth: 3
     toc-title: "Table of Contents"
@@ -41,8 +43,10 @@ format:
         \rhead{Supplementary Material --- IDS Acoustic Preferences (Stage 1 RR)}
         \setlength{\headheight}{15pt}
         \usepackage{caption}
-        \captionsetup[figure]{labelfont=bf, labelsep=period, skip=5pt}
-        \captionsetup[table]{labelfont=bf, labelsep=period, skip=5pt}
+        \DeclareCaptionLabelFormat{suppfig}{Figure S#2}
+        \DeclareCaptionLabelFormat{supptbl}{Table S#2}
+        \captionsetup[figure]{labelformat=suppfig, labelfont=bf, labelsep=period, skip=5pt}
+        \captionsetup[table]{labelformat=supptbl, labelfont=bf, labelsep=period, skip=5pt}
         \usepackage{multirow}
         \usepackage{setspace}
         \usepackage{orcidlink}
@@ -117,6 +121,57 @@ The simulation assumes one observation per condition per participant and a singl
 
 **Reproducibility.** All code, seeds, and parameters are documented here. The
 complete source file is available at: <https://github.com/JDLeongomez/Proyecto-IDS>
+
+\newpage
+
+## Stimulus Counterbalancing {.unnumbered}
+
+The table below shows the assignment of acoustic conditions to original 
+recordings (A--D) and avatars across the four counterbalancing lists 
+(G1--G4) and two blocks. Within each block, every original appears exactly 
+twice, paired with different acoustic conditions. Across lists, each 
+acoustic condition is paired equally often with each original. Block 2 
+mirrors Block 1 with avatars swapped, fully counterbalancing avatar at 
+the within-participant level.
+
+```{r}
+#| label: tbl-design
+#| tbl-cap: "Assignment of acoustic conditions to original recordings and avatars across counterbalancing lists and blocks."
+#| echo: false
+
+design_tbl <- data.frame(
+  `$f_0$ SD`   = rep(c("Low","Low","Low","Low","High","High","High","High"), 2),
+  `$f_0$ mean` = rep(c("Low","Low","High","High","Low","Low","High","High"), 2),
+  `$D_f$`      = rep(c("Low","High","Low","High","Low","High","Low","High"), 2),
+  G1 = c("A (Duck)","B (Bear)","C (Duck)","D (Bear)",
+          "A (Bear)","B (Duck)","C (Bear)","D (Duck)",
+          "A (Bear)","B (Duck)","C (Bear)","D (Duck)",
+          "A (Duck)","B (Bear)","C (Duck)","D (Bear)"),
+  G2 = c("B (Bear)","C (Duck)","D (Bear)","A (Duck)",
+          "C (Duck)","D (Bear)","A (Duck)","B (Bear)",
+          "B (Duck)","C (Bear)","D (Duck)","A (Bear)",
+          "C (Bear)","D (Duck)","A (Bear)","B (Duck)"),
+  G3 = c("C (Duck)","D (Duck)","A (Bear)","B (Bear)",
+          "D (Bear)","A (Bear)","B (Duck)","C (Duck)",
+          "C (Bear)","D (Bear)","A (Duck)","B (Duck)",
+          "D (Duck)","A (Duck)","B (Bear)","C (Bear)"),
+  G4 = c("D (Bear)","A (Bear)","B (Duck)","C (Duck)",
+          "B (Duck)","C (Duck)","D (Bear)","A (Bear)",
+          "D (Duck)","A (Duck)","B (Bear)","C (Bear)",
+          "B (Bear)","C (Bear)","D (Duck)","A (Duck)"),
+  check.names = FALSE
+)
+
+tt(design_tbl) |>
+  group_tt(
+    i = list("Block 1" = 1, "Block 2" = 9)
+  ) |>
+  style_tt(
+    i = c(1, 10), bold = TRUE, background = "#E8E8E8"
+  ) |>
+  style_tt(align = "ccccccc") |>
+  format_tt(escape = FALSE)
+```
 
 \newpage
 
