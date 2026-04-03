@@ -111,7 +111,7 @@ Three complementary analyses are presented here:
    equivalence rates by design (the CI stays outside the bounds precisely because real
    effects exist).
 
-3. **Bayesian sensitivity analysis** (brms + ROPE): a small number of Bayesian LMMs
+3. **Bayesian sensitivity analysis** (brms + ROPE): a number of Bayesian LMMs
    fitted in `brms` at the target sample size ($n = 200$) under each population.
    The proportion of the posterior for each main effect falling within the Region of
    Practical Equivalence (ROPE: ±150 ms) is computed using
@@ -138,7 +138,7 @@ the within-participant level.
 #| label: tbl-design
 #| tbl-cap: "Assignment of acoustic conditions to original recordings and avatars across counterbalancing lists and blocks."
 #| echo: false
-
+library(tinytable)
 design_tbl <- data.frame(
   `$f_0$ SD`   = rep(c("Low","Low","Low","Low","High","High","High","High"), 2),
   `$f_0$ mean` = rep(c("Low","Low","High","High","Low","Low","High","High"), 2),
@@ -165,11 +165,14 @@ design_tbl <- data.frame(
 tt(design_tbl) |>
   group_tt(
     i = list("Block 1" = 1, "Block 2" = 9)
-  ) |>
+    ) |>
   style_tt(
-    i = c(1, 10), bold = TRUE, background = "#E8E8E8"
-  ) |>
-  style_tt(align = "ccccccc") |>
+    i = c(1, 10), bold = TRUE
+    ) |>
+  style_tt(
+    j = 3, i = c(0, 2:9, 11:18), line = "r"
+    ) |> 
+  style_tt(align = "c") |>
   format_tt(escape = FALSE)
 ```
 
@@ -224,8 +227,8 @@ document.
 # ── Simulation scale ─────────────────────────────────────────────────────────
 set.seed(2025)          # Global seed for reproducibility
 n_pop        <- 10000   # Size of each simulated superpopulation
-n_sim        <- 100     # Monte Carlo iterations per sample size (frequentist)
-n_sim_bayes  <- 100     # brms simulations at target n
+n_sim        <- 1000    # Monte Carlo iterations per sample size (frequentist)
+n_sim_bayes  <- 1000    # brms simulations at target n
                            
 sample_sizes <- seq(10, 250, by = 10)  # Sample sizes evaluated
 target_n     <- 200     # Pre-specified target sample size
