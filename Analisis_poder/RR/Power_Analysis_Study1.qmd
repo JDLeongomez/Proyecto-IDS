@@ -97,42 +97,21 @@ For computational tractability, the simulation uses a simplified version of this
 
 Three complementary analyses are presented here:
 
-1. **Frequentist detection power** (Monte Carlo, H$_1$ population): the probability
-   of detecting each main effect via a significant $p$-value ($\alpha = .05$) in the
-   LMM ANOVA, as a function of sample size. Estimated from a superpopulation
-   incorporating all expected effects.
+1. **Frequentist detection power** (Monte Carlo, H$_1$ population): the probability of detecting each main effect via a significant $p$-value ($\alpha = .05$) in the LMM ANOVA, as a function of sample size. Estimated from a superpopulation incorporating all expected effects.
 
-2. **Frequentist equivalence power** (Monte Carlo, H$_0$ population): the probability
-   of concluding practical equivalence with zero (i.e., the probability that a 90%
-   CI from the marginal `emmeans` contrast falls entirely within pre-specified
-   equivalence bounds of ±150 ms) as a function of sample size. Critically,
-   this is estimated from a **separate** superpopulation in which all acoustic
-   effects are set to zero, because using the H$_1$ data would yield near-zero
-   equivalence rates by design (the CI stays outside the bounds precisely because real
-   effects exist).
+2. **Frequentist equivalence power** (Monte Carlo, H$_0$ population): the probability of concluding practical equivalence with zero (i.e., the probability that a 90% CI from the marginal `emmeans` contrast falls entirely within pre-specified equivalence bounds of ±150 ms) as a function of sample size. Critically, this is estimated from a **separate** superpopulation in which all acoustic effects are set to zero, because using the H$_1$ data would yield near-zero equivalence rates by design (the CI stays outside the bounds precisely because real effects exist).
 
-3. **Bayesian sensitivity analysis** (brms + ROPE): a number of Bayesian LMMs
-   fitted in `brms` at the target sample size ($n = 200$) under each population.
-   The proportion of the posterior for each main effect falling within the Region of
-   Practical Equivalence (ROPE: ±150 ms) is computed using
-   `bayestestR::equivalence_test()`, serving as a secondary robustness check.
+3. **Bayesian sensitivity analysis** (brms + ROPE): a number of Bayesian LMMs fitted in `brms` at the target sample size ($n = 200$) under each population. The proportion of the posterior for each main effect falling within the Region of Practical Equivalence (ROPE: ±150 ms) is computed using `bayestestR::equivalence_test()`, serving as a secondary robustness check.
 
 The simulation assumes one observation per condition per participant and a single stimulus source. The actual design includes two blocks, yielding two observations per condition per participant, which halves the variance of each `emmeans` contrast, reducing the SE by a factor of approximately $\sqrt{2}$ relative to the simulated design. The simulation additionally omits random effects for original voice recordings $(1 \mid \text{original})$ and the by-participant avatar slope $(1 + \texttt{avatar} \mid\mid \text{ID})$, which introduce additional variance not captured here. The net power estimates are therefore conservative: the doubling of within-participant observations substantially outweighs the additional variance from the expanded random-effects structure, and the reported power curves should be treated as lower bounds on the power of the actual design.
 
-**Reproducibility.** All code, seeds, and parameters are documented here. The
-complete source file is available at: <https://github.com/JDLeongomez/Proyecto-IDS>
+**Reproducibility.** All code, seeds, and parameters are documented here. The complete source file is available at: <https://github.com/JDLeongomez/Proyecto-IDS>
 
 \newpage
 
 ## Stimulus Counterbalancing {.unnumbered}
 
-The table below shows the assignment of acoustic conditions to original 
-recordings (A--D) and avatars across the four counterbalancing lists 
-(G1--G4) and two blocks. Within each block, every original appears exactly 
-twice, paired with different acoustic conditions. Across lists, each 
-acoustic condition is paired equally often with each original. Block 2 
-mirrors Block 1 with avatars swapped, fully counterbalancing avatar at 
-the within-participant level.
+The table below shows the assignment of acoustic conditions to original recordings (A--D) and avatars across the four counterbalancing lists (G1--G4) and two blocks. Within each block, every original appears exactly twice, paired with different acoustic conditions. Across lists, each acoustic condition is paired equally often with each original. Block 2 mirrors Block 1 with avatars swapped, fully counterbalancing avatar at the within-participant level.
 
 ```{r}
 #| label: tbl-design
@@ -180,15 +159,7 @@ tt(design_tbl) |>
 
 # Packages
 
-All packages are available from CRAN. The analysis uses the `tidyverse` ecosystem
-[@tidyversecit] for data manipulation and visualisation, `lmerTest` [@lmercit] for
-LMMs with Satterthwaite degrees of freedom and $p$-values, `emmeans` [@emmeanscit]
-for marginal contrasts and confidence intervals, `effectsize` [@effectsizecit] for
-partial $\omega^2$ estimates, `furrr` [@furrrcit] for parallel Monte Carlo sampling,
-`brms` [@brmscit] for Bayesian LMMs via Stan, and `bayestestR`
-[@bayestestRcit] for ROPE-based equivalence testing. Visualisation uses `ggdist`
-[@ggdistcit1; @ggdistcit2], `tidyquant` [@tidyquantcit], `ggpubr` [@ggpubrcit],
-and `tinytable` [@tinytablecit] for publication-quality tables. The Bayesian models are compiled and sampled via cmdstanr [@cmdstanrcit], which provides an R interface to CmdStan and is used as the backend for brms.
+All packages are available from CRAN. The analysis uses the `tidyverse` ecosystem [@tidyversecit] for data manipulation and visualisation, `lmerTest` [@lmercit] for LMMs with Satterthwaite degrees of freedom and $p$-values, `emmeans` [@emmeanscit] for marginal contrasts and confidence intervals, `effectsize` [@effectsizecit] for partial $\omega^2$ estimates, `furrr` [@furrrcit] for parallel Monte Carlo sampling, `brms` [@brmscit] for Bayesian LMMs via Stan, and `bayestestR` [@bayestestRcit] for ROPE-based equivalence testing. Visualisation uses `ggdist` [@ggdistcit1; @ggdistcit2], `tidyquant` [@tidyquantcit], `ggpubr` [@ggpubrcit], and `tinytable` [@tinytablecit] for publication-quality tables. The Bayesian models are compiled and sampled via cmdstanr [@cmdstanrcit], which provides an R interface to CmdStan and is used as the backend for brms.
 
 ```{r}
 #| label: packages
@@ -217,8 +188,7 @@ if (!dir.exists(cmdstan_path())) {
 
 # Global Parameters {#sec-parameters}
 
-All key parameters are defined here. Changes propagate automatically throughout the
-document.
+All key parameters are defined here. Changes propagate automatically throughout the document.
 
 ```{r}
 #| label: parameters
@@ -266,29 +236,13 @@ rope_range <- c(-eq_bound, eq_bound)
 
 ## Rationale for Equivalence Testing
 
-Conventional null-hypothesis significance testing (NHST) cannot distinguish between
-a true null effect and an underpowered study. For a registered report, it is
-therefore essential to pre-specify a procedure that permits positive evidence for the
-absence of a meaningful effect. The two one-sided tests (TOST) procedure achieves
-this by testing whether an observed effect lies within pre-defined equivalence bounds
-$[-\Delta, +\Delta]$, or equivalently, whether the $(1 - 2\alpha)$ CI falls entirely
-within those bounds [@lakensEquivalenceTestsPractical2017].
+Conventional null-hypothesis significance testing (NHST) cannot distinguish between a true null effect and an underpowered study. For a registered report, it is therefore essential to pre-specify a procedure that permits positive evidence for the absence of a meaningful effect. The two one-sided tests (TOST) procedure achieves this by testing whether an observed effect lies within pre-defined equivalence bounds $[-\Delta, +\Delta]$, or equivalently, whether the $(1 - 2\alpha)$ CI falls entirely within those bounds [@lakensEquivalenceTestsPractical2017].
 
 ## Defining the Smallest Effect Size of Interest (SESOI)
 
-The equivalence bounds must be anchored to a *smallest effect size of interest*
-(SESOI): the minimum difference in fixation time that would be theoretically or
-practically meaningful. The three confirmatory hypotheses are associated with
-expected effects of `r eff_f0sd` ms ($f_0$ SD), `r eff_f0mean` ms ($f_0$ mean),
-and `r eff_Df` ms ($D_f$; see @sec-popdata). Rather than defining the SESOI purely
-in terms of these predicted effects, we anchor it to the **precision limit of the
-design**: the smallest effect that a well-powered infant eye-tracking study of
-feasible size could realistically detect.
+The equivalence bounds must be anchored to a *smallest effect size of interest* (SESOI): the minimum difference in fixation time that would be theoretically or practically meaningful. The three confirmatory hypotheses are associated with expected effects of `r eff_f0sd` ms ($f_0$ SD), `r eff_f0mean` ms ($f_0$ mean), and `r eff_Df` ms ($D_f$; see @sec-popdata). Rather than defining the SESOI purely in terms of these predicted effects, we anchor it to the **precision limit of the design**: the smallest effect that a well-powered infant eye-tracking study of feasible size could realistically detect.
 
-With a residual standard deviation of $\sigma \approx `r residual_sd`$ ms
-(consistent with published infant eye-tracking data) and $n = `r target_n`$
-participants each contributing 4 observations per level of each factor, the
-approximate standard error of the marginal High $-$ Low contrast is:
+With a residual standard deviation of $\sigma \approx `r residual_sd`$ ms (consistent with published infant eye-tracking data) and $n = `r target_n`$ participants each contributing 4 observations per level of each factor, the approximate standard error of the marginal High $-$ Low contrast is:
 
 $$SE \approx \sqrt{\frac{\sigma^2}{2n}} =
   \sqrt{\frac{`r residual_sd`^2}{2 \times `r target_n`}} \approx
@@ -300,48 +254,26 @@ $$\Delta_{80\%} \approx SE \times (z_{0.90} + z_{0.80}) =
   `r round(sqrt(residual_sd^2 / (2 * target_n)), 1)` \times 2.927 \approx
   `r round(sqrt(residual_sd^2 / (2 * target_n)) * 2.927, 0)`\text{ ms}$$
 
-We set equivalence bounds at $\Delta = \pm`r eq_bound`$ ms (the rounded value
-closest to $\Delta_{80\%}$ that remains scientifically interpretable). An effect
-smaller than `r eq_bound` ms represents `r round(eq_bound / (y_max - y_min) * 100, 0)`%
-of the total fixation-time range (0–`r y_max` ms) and
-`r round(eq_bound / eff_f0sd * 100, 0)`% of the largest expected main effect
-($f_0$ SD = `r eff_f0sd` ms). Such an effect would be undetectable by any
-practically feasible infant eye-tracking study and is therefore an appropriate
-threshold for inferring negligibility.
+We set equivalence bounds at $\Delta = \pm`r eq_bound`$ ms (the rounded value closest to $\Delta_{80\%}$ that remains scientifically interpretable). An effect smaller than `r eq_bound` ms represents `r round(eq_bound / (y_max - y_min) * 100, 0)`% of the total fixation-time range (0–`r y_max` ms) and `r round(eq_bound / eff_f0sd * 100, 0)`% of the largest expected main effect ($f_0$ SD = `r eff_f0sd` ms). Such an effect would be undetectable by any practically feasible infant eye-tracking study and is therefore an appropriate threshold for inferring negligibility.
 
 ## Equivalence Power
 
-The H$_0$ Monte Carlo simulation in @sec-mc confirms that, at $n = `r target_n`$
-with bounds of $\pm`r eq_bound`$ ms, equivalence power reaches approximately 80%.
-This is an honest reflection of the precision constraints of the infant
-eye-tracking paradigm: the high trial-level noise ($\sigma \approx `r residual_sd`$
-ms) means that ruling out effects smaller than `r eq_bound` ms requires the full
-target sample. Equivalence power at smaller $n$ (e.g., $n = 160$) would be
-substantially lower (~70%), which is one motivation for the planned sample size to $n = `r target_n`$.
+The H$_0$ Monte Carlo simulation in @sec-mc confirms that, at $n = `r target_n`$ with bounds of $\pm`r eq_bound`$ ms, equivalence power reaches approximately 80%. This is an honest reflection of the precision constraints of the infant
+eye-tracking paradigm: the high trial-level noise ($\sigma \approx `r residual_sd`$ ms) means that ruling out effects smaller than `r eq_bound` ms requires the full target sample. Equivalence power at smaller $n$ (e.g., $n = 160$) would be substantially lower (~70%), which is one motivation for the planned sample size to $n = `r target_n`$.
 
 ## Operationalisation
 
 ### Frequentist equivalence test
 
-The marginal pairwise contrast (High $-$ Low, averaged over all levels of the other
-two factors) is estimated using `emmeans` with Satterthwaite degrees of freedom. A
-`r ci_level * 100`% CI is computed. Equivalence is concluded if:
+The marginal pairwise contrast (High $-$ Low, averaged over all levels of the other two factors) is estimated using `emmeans` with Satterthwaite degrees of freedom. A `r ci_level * 100`% CI is computed. Equivalence is concluded if:
 
 $$\text{Lower CL} > `r -eq_bound`\text{ ms} \;\;\text{and}\;\; \text{Upper CL} < `r eq_bound`\text{ ms}$$
 
-Equivalence power is estimated from a dedicated H$_0$ superpopulation in which all
-acoustic effects are zero (see @sec-null), ensuring the estimate describes the
-correct conditional probability.
+Equivalence power is estimated from a dedicated H$_0$ superpopulation in which all acoustic effects are zero (see @sec-null), ensuring the estimate describes the correct conditional probability.
 
 ### Bayesian ROPE
 
-The same bounds define the ROPE for the Bayesian sensitivity analysis. Weakly
-informative priors place no strong prior mass near zero, so high ROPE percentages
-reflect genuine posterior evidence for equivalence. Following
-[@kruschkeDoingBayesianData2015], we report both the ROPE percentage and whether the
-`r ci_level * 100`% Highest Density Interval (HDI) [@kruschkeDoingBayesianData2015;
-@bayestestRcit] falls entirely within the ROPE (strong
-equivalence).
+The same bounds define the ROPE for the Bayesian sensitivity analysis. Weakly informative priors place no strong prior mass near zero, so high ROPE percentages reflect genuine posterior evidence for equivalence. Following [@kruschkeDoingBayesianData2015], we report both the ROPE percentage and whether the `r ci_level * 100`% Highest Density Interval (HDI) [@kruschkeDoingBayesianData2015; @bayestestRcit] falls entirely within the ROPE (strong equivalence).
 
 \newpage
 
@@ -349,12 +281,7 @@ equivalence).
 
 ## H$_1$ Population: Non-Zero Acoustic Effects
 
-Each participant observes all eight combinations of three acoustic factors, 
-$f_0$ SD (Low/High), $f_0$ mean (Low/High), and $D_f$ (Low/High), yielding a
-2×2×2 fully crossed within-subjects design. The outcome is total fixation time (ms),
-bounded to [0, 5000]. We simulate an H$_1$ superpopulation of $N =
-`r format(n_pop, big.mark = ",")`$ participants (×8 conditions = `r format(n_pop * 8, big.mark = ",")` rows)
-from which Monte Carlo samples are drawn to estimate **detection power**.
+Each participant observes all eight combinations of three acoustic factors, $f_0$ SD (Low/High), $f_0$ mean (Low/High), and $D_f$ (Low/High), yielding a 2×2×2 fully crossed within-subjects design. The outcome is total fixation time (ms), bounded to [0, 5000]. We simulate an H$_1$ superpopulation of $N = `r format(n_pop, big.mark = ",")`$ participants (×8 conditions = `r format(n_pop * 8, big.mark = ",")` rows) from which Monte Carlo samples are drawn to estimate **detection power**.
 
 The data-generating model is:
 
@@ -442,11 +369,7 @@ h1_data <- make_population(
 
 ## H$_0$ Population: All Acoustic Effects Zero {#sec-null}
 
-Detection power and equivalence power must be estimated from **separate**
-superpopulations. Detection power asks: given real effects, how often do we detect
-them? Equivalence power asks: given no effects, how often do we correctly conclude
-equivalence? The H$_0$ superpopulation is structurally identical to H$_1$ but with
-all acoustic effects set to zero.
+Detection power and equivalence power must be estimated from **separate** superpopulations. Detection power asks: given real effects, how often do we detect them? Equivalence power asks: given no effects, how often do we correctly conclude equivalence? The H$_0$ superpopulation is structurally identical to H$_1$ but with all acoustic effects set to zero.
 
 ```{r}
 #| label: simulate-h0
@@ -584,18 +507,11 @@ ggplot(h1_data, aes(x = f0_sd, y = fixation_time, fill = f0_sd)) +
 Detection and equivalence power are estimated from two independent Monte Carlo
 simulations:
 
-- **Detection power** (H$_1$ population): `r n_sim` samples per candidate $n$ from
-  `h1_data`. For each sample, the LMM ANOVA $p$-value is recorded for each main
-  effect. Power = proportion of samples with $p < `r alpha`$.
+- **Detection power** (H$_1$ population): `r n_sim` samples per candidate $n$ from `h1_data`. For each sample, the LMM ANOVA $p$-value is recorded for each main effect. Power = proportion of samples with $p < `r alpha`$.
 
-- **Equivalence power** (H$_0$ population): `r n_sim` samples per candidate $n$ from
-  `h0_data`. For each sample, the marginal High $-$ Low contrast is estimated via
-  `emmeans` (Satterthwaite df) with a `r ci_level * 100`% CI. Power = proportion of
-  samples where the CI falls entirely within $[\text{-}`r eq_bound`$,
-  $`r eq_bound`]$ ms.
+- **Equivalence power** (H$_0$ population): `r n_sim` samples per candidate $n$ from  `h0_data`. For each sample, the marginal High $-$ Low contrast is estimated via `emmeans` (Satterthwaite df) with a `r ci_level * 100`% CI. Power = proportion of samples where the CI falls entirely within $[\text{-}`r eq_bound`$, $`r eq_bound`]$ ms.
 
-Both loops cover $n$ = `r min(sample_sizes)` to `r max(sample_sizes)` (steps of 10)
-and run in parallel via `furrr`.
+Both loops cover $n$ = `r min(sample_sizes)` to `r max(sample_sizes)` (steps of 10) and run in parallel via `furrr`.
 
 ## Simulation Functions
 
@@ -626,7 +542,7 @@ run_detection_sim <- function(dat, n_sample, n_sim, alpha = 0.05) {
 
 # Equivalence: 90% CIs from emmeans, check ROPE containment (H0 data) ---------
 run_equivalence_sim <- function(dat, n_sample, n_sim,
-                                ci_lev = 0.90, bound = 100) {
+                                ci_lev = 0.90, bound = eq_bound) {
   map_dfr(seq_len(n_sim), function(i) {
     ids  <- dat |> distinct(ID) |> slice_sample(n = n_sample) |> pull(ID)
     sdat <- dat |> filter(ID %in% ids)
@@ -938,12 +854,7 @@ detect_at_target |>
   format_tt(escape = FALSE)
 ```
 
-The simulation confirms that a sample of **$n$ = `r n_recommended`** achieves
-$> 80\%$ detection power for all three confirmatory main effects, and that the
-pre-specified target of $n$ = `r target_n` further ensures approximately 80%
-equivalence power at bounds of $\pm`r eq_bound`$ ms (see @sec-bounds). Both
-detection and equivalence considerations therefore motivate the target of
-$n$ = `r target_n`.
+The simulation confirms that a sample of **$n$ = `r n_recommended`** achieves $> 80\%$ detection power for all three confirmatory main effects, and that the pre-specified target of $n$ = `r target_n` further ensures approximately 80% equivalence power at bounds of $\pm`r eq_bound`$ ms (see @sec-bounds). Both detection and equivalence considerations therefore motivate the target of $n$ = `r target_n`.
 
 \newpage
 
@@ -951,23 +862,15 @@ $n$ = `r target_n`.
 
 ## Rationale and Scope
 
-The Bayesian analysis is a secondary robustness check. Rather than Bayes factors, 
-which require bridge sampling and can be numerically unstable for complex LMMs,
-we apply the ROPE procedure from `bayestestR`
-[@bayestestRcit] to posteriors from `brms` models. Two sets
-of `r n_sim_bayes` models are fitted at $n = `r target_n`$, mirroring the
-frequentist structure:
+The Bayesian analysis is a secondary robustness check. Rather than Bayes factors, which require bridge sampling and can be numerically unstable for complex LMMs,
+we apply the ROPE procedure from `bayestestR` [@bayestestRcit] to posteriors from `brms` models. Two sets of `r n_sim_bayes` models are fitted at $n = `r target_n`$, mirroring the frequentist structure:
 
-- **H$_1$ models**: data from `h1_data`. Posteriors should lie far from the ROPE,
-  confirming sensitivity.
-- **H$_0$ models**: data from `h0_data`. ROPE percentages should be high,
-  quantifying Bayesian equivalence power.
+- **H$_1$ models**: data from `h1_data`. Posteriors should lie far from the ROPE, confirming sensitivity.
+- **H$_0$ models**: data from `h0_data`. ROPE percentages should be high, quantifying Bayesian equivalence power.
 
 ## Prior Specification {#sec-priors}
 
-We use **sum contrast coding** (Low = −0.5; High = +0.5) so that each main-effect
-coefficient equals the marginal High $-$ Low difference, directly comparable to
-the `emmeans` marginal contrast. Priors are weakly informative:
+We use **sum contrast coding** (Low = −0.5; High = +0.5) so that each main-effect coefficient equals the marginal High $-$ Low difference, directly comparable to the `emmeans` marginal contrast. Priors are weakly informative:
 
 ```{r}
 #| label: tbl-priors
@@ -1291,33 +1194,18 @@ detect_at_target |>
        "$ ms, from H$_0$ simulations. ",
        "Bayesian ROPE analysis uses the same bounds; see the Bayesian 
        Sensitivity Analysis section.")) |>
-  tt_style(align = "lcccc") |> 
+  style_tt(align = "lcccc") |> 
   format_tt(escape = FALSE)
 ```
 
 The simulation confirms that:
 
-- At **$n$ = `r target_n`**, detection power exceeds 80% for all three confirmatory
-  main effects under the assumed population effect sizes.
-- **Equivalence bounds** are set at $\pm`r eq_bound`$ ms, anchored to the
-  precision limit of the design: the smallest effect detectable by a
-  practically feasible infant eye-tracking study of this type, given
-  $\sigma \approx `r residual_sd`$ ms. This corresponds to
-  `r round(eq_bound / (y_max - y_min) * 100, 0)`% of the total fixation-time
-  range and `r round(eq_bound / eff_f0sd * 100, 0)`% of the largest expected main
-  effect [@simonsohnSmallTelescopes2015; @lakensEquivalenceTestingPsychological2018].
-- **Equivalence power** at $n$ = `r target_n` is approximately
-  `r paste0(round(mean(equiv_at_target$power_equiv) * 100, 0), "%")` on average,
-  meeting the 80% target.
-- The **frequentist equivalence test** generalises TOST to LMM fixed effects via
-  model-based `emmeans` CIs, and detection and equivalence power are estimated from
-  separate superpopulations as required for correct interpretation
-  [@lakensEquivalenceTestsPractical2017].
-- The **Bayesian ROPE analysis** uses `brms` with weakly informative priors and
-  `bayestestR`'s `equivalence_test()` [@bayestestRcit], reported as a secondary analysis in the
-  main Registered Report.
-- **Interaction effects** are not powered at this sample size and are treated as
-  exploratory throughout.
+- At **$n$ = `r target_n`**, detection power exceeds 80% for all three confirmatory main effects under the assumed population effect sizes.
+- **Equivalence bounds** are set at $\pm`r eq_bound`$ ms, anchored to the precision limit of the design: the smallest effect detectable by a practically feasible infant eye-tracking study of this type, given $\sigma \approx `r residual_sd`$ ms. This corresponds to   `r round(eq_bound / (y_max - y_min) * 100, 0)`% of the total fixation-time range and `r round(eq_bound / eff_f0sd * 100, 0)`% of the largest expected main effect [@simonsohnSmallTelescopes2015; @lakensEquivalenceTestingPsychological2018].
+- **Equivalence power** at $n$ = `r target_n` is approximately `r paste0(round(mean(equiv_at_target$power_equiv) * 100, 0), "%")` on average, meeting the 80% target.
+- The **frequentist equivalence test** generalises TOST to LMM fixed effects via model-based `emmeans` CIs, and detection and equivalence power are estimated from separate superpopulations as required for correct interpretation [@lakensEquivalenceTestsPractical2017].
+- The **Bayesian ROPE analysis** uses `brms` with weakly informative priors and `bayestestR`'s `equivalence_test()` [@bayestestRcit], reported as a secondary analysis in the main Registered Report.
+- **Interaction effects** are not powered at this sample size and are treated as exploratory throughout.
 
 \newpage
 
@@ -1327,7 +1215,7 @@ The simulation confirms that:
 #| label: session-info
 #| cache: false
 
-pander::pander(sessionInfo())
+pander::pander(sessionInfo(), locale = FALSE)
 ```
 
 # References
