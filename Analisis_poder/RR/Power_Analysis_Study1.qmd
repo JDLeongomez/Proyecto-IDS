@@ -65,6 +65,7 @@ format:
           \end{flushleft}
           \vspace{0.5em}
         }
+        \AtBeginBibliography{\addcontentsline{toc}{section}{References}}
 
 bibliography: Files/Bibliography.bib
 link-citations: true
@@ -84,6 +85,8 @@ knitr:
 ---
 
 \newpage
+
+\colorbox{BurntOrange}{CHECK MISSING URLs}
 
 ## Description {.unnumbered}
 
@@ -154,6 +157,24 @@ tt(design_tbl) |>
   style_tt(align = "c") |>
   format_tt(escape = FALSE)
 ```
+
+## Stimulus Generation {.unnumbered}
+
+Eight manipulated versions of each original IDS recording will be generated using a custom Praat script [@praat] (available at the project repository). Each version corresponds to one cell of the fully crossed 2×2×2 design, in which mean fundamental frequency ($f_0$ mean), pitch variability ($f_0$ SD), and formant dispersion ($D_f$) are each set to a High or Low level. The two levels for each parameter are defined as $\pm k$% of the corresponding baseline value measured from the original recording, with $k$ set independently for each parameter. Baseline values are estimated using Praat's autocorrelation-based pitch analysis for $f_0$ mean and $f_0$ SD, and Burg's formant analysis for $D_f$, operationalised as $(F_4 - F_1) / 3$ — the mean spacing between the first four formants, a standard measure of vocal tract length [@pisanski2014; @feinberg2005].
+
+Manipulation proceeds in two sequential steps per stimulus.
+
+**Step 1 — Formant dispersion ($D_f$).** $D_f$ is manipulated first, applied directly to the original (unmodified) recording, via an LPC source-filter resynthesis pipeline adapted from the Praat Vocal Toolkit [@corretge2012]. Briefly: (a) the spectral content above the analysis ceiling (5500 Hz for female speakers) is preserved as a high-frequency residual; (b) the recording is resampled to twice the analysis ceiling; (c) a robust formant analysis is performed and converted to an LPC filter; (d) the signal is inverse-filtered to isolate the glottal source; (e) all formant frequencies in a copy of the formant object are scaled by the target ratio $r = 1 \pm k_{D_f}$; (f) the modified formant object is converted to a new LPC filter and used to re-filter the source; (g) the result is resampled to the original rate and the high-frequency residual is added back. Because this pipeline operates entirely in the spectral domain and does not involve pitch-synchronous resynthesis (PSOLA), the pitch contour of the original recording is left unchanged.
+
+**Step 2 — $f_0$ mean and $f_0$ SD.** $f_0$ mean and $f_0$ SD are manipulated jointly in a second step, applied to the $D_f$-shifted intermediate. An autocorrelation-based pitch estimate is computed from this intermediate, yielding its actual $f_0$ mean ($\mu_\text{src}$) and $f_0$ SD ($\sigma_\text{src}$). An affine transform is then applied to every voiced frame:
+
+$$f_0^\prime(t) = a + b \cdot f_0(t)$$
+
+where the slope $b = \sigma_\text{target} / \sigma_\text{src}$ scales the pitch distribution width, and the intercept $a = \mu_\text{target} - \mu_\text{src} \cdot b$ shifts its centre. The modified pitch object is converted to a PitchTier, inserted into a Praat Manipulation object, and the final sound is obtained via overlap-add PSOLA resynthesis.
+
+Because PSOLA resynthesis introduces a small but systematic discrepancy between the programmed and realised pitch SD — arising from differences between the fixed-timestep pitch analysis grid and the pitch-period-based PitchTier representation — an iterative correction procedure is applied. After each resynthesis, the output is re-analysed; if the absolute difference between the measured and target SD exceeds 0.5 Hz, the slope is updated multiplicatively as $b \leftarrow b \cdot (\sigma_\text{target} / \sigma_\text{measured})$, with the intercept recomputed from the fixed source mean. This repeats up to a maximum of five iterations; convergence is typically achieved within two to three iterations.
+
+**Verification.** All eight output files are re-analysed independently after saving using the same pitch and formant analysis settings as the baseline (with the formant analysis ceiling raised to 6500 Hz to avoid tracker bias from upward-shifted formants approaching the synthesis ceiling). The realised $f_0$ mean, $f_0$ SD, and $D_f$ of each stimulus will be reported in the manuscript. The full script is available at \colorbox{BurntOrange}{ADD-URL}.
 
 \newpage
 
