@@ -16,7 +16,7 @@ format:
   pdf:
     documentclass: article
     cite-method: biblatex
-    biblio-style: apa
+    biblio-style: nature
     number-sections: true
     tbl-prefix: "S"
     fig-prefix: "S"
