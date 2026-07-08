@@ -246,7 +246,7 @@ readLines("population_norms/hilton2022_population_norms.R") |> cat(sep = "\n")
 ```{r}
 #| label: fig-norms-dist
 #| fig-cap: "Between-speaker distributions of the three acoustic parameters in female
-#|   infant-directed speech, derived from Hilton et al. (2022). Vertical dashed lines
+#|   infant-directed speech, derived from Hilton et al. [-@hilton2022]. Vertical dashed lines
 #|   show population means; shaded bands show ±1 SD (the manipulation targets)."
 #| fig-width: 9
 #| fig-height: 3.2
@@ -288,7 +288,7 @@ ggplot(plot_data, aes(x = value)) +
 ```{r}
 #| label: tbl-norms
 #| tbl-cap: "Population norms for the three acoustic parameters derived from female
-#|   IDS speakers in Hilton et al. (2022), and cross-checks from independent
+#|   IDS speakers in Hilton et al. [-@hilton2022], and cross-checks from independent
 #|   sources. All manipulation targets are set at ±1 between-speaker SD. The formant
 #|   frequencies target is a proportional scaling factor (CV × 1)."
 #| echo: false
