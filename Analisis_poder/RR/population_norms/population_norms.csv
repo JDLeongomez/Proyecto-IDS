@@ -1,4 +1,4 @@
 parameter,source,n_speakers,pop_mean_hz,pop_sd_hz,manip_target,manip_factor,notes
-f0_mean,"Hilton et al. (2022), IDS speech, female speakers",356,261.8258506208451,50.79356643226418,76.19034964839626,NA,Hz; cross-check: Cox et al. (2023) ~40 Hz SD -> ±60 Hz
-f0_sd,"Hilton et al. (2022), IDS speech, female speakers",356,66.59428453971832,28.39415584520936,42.591233767814046,NA,Hz; cross-check: Broesch & Bryant (2014) ~24 Hz SD -> ±36 Hz
-vtl_proxy,"Hilton et al. (2022), IDS speech, female speakers",356,1920.8695791376472,87.43690482420311,NA,0.06827915786723292,Geometric mean F1-F4 (Hz); factor used as proportional scaling in Praat script
+f0_mean,"Hilton et al. (2022), IDS speech, female speakers",356,261.8258506208451,50.79356643226418,50.79356643226418,NA,Hz; cross-check: Cox et al. (2023) ~40 Hz SD -> ±60 Hz
+f0_sd,"Hilton et al. (2022), IDS speech, female speakers",356,66.59428453971832,28.39415584520936,28.39415584520936,NA,Hz; cross-check: Broesch & Bryant (2014) ~24 Hz SD -> ±36 Hz
+vtl_proxy,"Hilton et al. (2022), IDS speech, female speakers",356,1920.8695791376472,87.43690482420311,NA,0.045519438578155276,Geometric mean F1-F4 (Hz); factor used as proportional scaling in Praat script

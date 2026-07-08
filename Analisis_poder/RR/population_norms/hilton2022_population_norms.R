@@ -140,7 +140,7 @@ by_speaker <- dat_ids_speech_f |>
 cat(sprintf("\nSpeakers in analysis: %d\n", nrow(by_speaker)))
 
 # =============================================================================
-# 6. Between-speaker SDs and manipulation targets (±1.5 SD)
+# 6. Between-speaker SDs and manipulation targets (±1 SD)
 # =============================================================================
 
 norms <- by_speaker |>
@@ -148,18 +148,18 @@ norms <- by_speaker |>
     # --- f0 mean ---
     f0mean_pop_mean  = mean(f0_mean_hz, na.rm = TRUE),
     f0mean_pop_sd    = sd(f0_mean_hz,   na.rm = TRUE),
-    f0mean_manip_hz  = 1.5 * sd(f0_mean_hz, na.rm = TRUE),
+    f0mean_manip_hz  = 1 * sd(f0_mean_hz, na.rm = TRUE),
     
     # --- f0 SD ---
     f0sd_pop_mean    = mean(f0_sd_hz, na.rm = TRUE),
     f0sd_pop_sd      = sd(f0_sd_hz,   na.rm = TRUE),
-    f0sd_manip_hz    = 1.5 * sd(f0_sd_hz, na.rm = TRUE),
+    f0sd_manip_hz    = 1 * sd(f0_sd_hz, na.rm = TRUE),
     
     # --- VTL proxy (geometric mean F1-F4) ---
     vtl_pop_mean     = mean(vtl_proxy_hz, na.rm = TRUE),
     vtl_pop_sd       = sd(vtl_proxy_hz,   na.rm = TRUE),
     vtl_cv           = sd(vtl_proxy_hz, na.rm = TRUE) / mean(vtl_proxy_hz, na.rm = TRUE),
-    vtl_manip_factor = 1.5 * sd(vtl_proxy_hz, na.rm = TRUE) / mean(vtl_proxy_hz, na.rm = TRUE)
+    vtl_manip_factor = 1 * sd(vtl_proxy_hz, na.rm = TRUE) / mean(vtl_proxy_hz, na.rm = TRUE)
   )
 
 cat("\n=== Population norms: Hilton et al. (2022) IDS speech, female speakers ===\n\n")
@@ -178,7 +178,7 @@ cat(sprintf(
   norms$vtl_pop_mean, norms$vtl_pop_sd,
   norms$vtl_cv, norms$vtl_manip_factor, norms$vtl_manip_factor * 100
 ))
-cat("           current provisional value in Praat script: ±10%\n\n")
+cat("           current target value in Praat script: ±4.6%\n\n")
 
 # =============================================================================
 # 7. Distributions
