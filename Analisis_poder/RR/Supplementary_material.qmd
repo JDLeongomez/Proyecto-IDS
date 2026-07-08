@@ -94,8 +94,6 @@ knitr:
 
 \newpage
 
-\colorbox{BurntOrange}{CHECK MISSING URLs}
-
 # Overview {.unnumbered}
 
 This document is the supplementary material for the registered report *Acoustic drivers of infant attention in infant-directed speech*. It covers two topics: stimulus preparation and design, including the derivation of population norms for acoustic manipulation and the counterbalancing scheme; and a simulation-based power analysis. The study uses a 2×2×2 fully crossed within-subjects design to examine the effects of three independently manipulated acoustic properties of infant-directed speech (IDS) on total fixation time (ms) in pre-linguistic infants aged 3–9 months: mean fundamental frequency ($f_0$ mean) and pitch variability ($f_0$ SD) are the two confirmatory parameters (H1 and H2), and formant frequencies (proportional scaling of all formant frequencies, targeting apparent vocal tract length) are treated as an exploratory parameter.
@@ -116,7 +114,7 @@ Three complementary analyses are presented here:
 
 The simulation assumes one observation per condition per participant and a single stimulus source. The actual design includes two blocks, yielding two observations per condition per participant, which halves the variance of each `emmeans` contrast, reducing the SE by a factor of approximately $\sqrt{2}$ relative to the simulated design. The simulation additionally omits random effects for original voice recordings $(1 \mid \text{original})$ and the by-participant avatar slope $(1 + \texttt{avatar} \mid\mid \text{ID})$, which introduce additional variance not captured here. The net power estimates are therefore conservative: the doubling of within-participant observations substantially outweighs the additional variance from the expanded random-effects structure, and the reported power curves should be treated as lower bounds on the power of the actual design.
 
-**Reproducibility.** All code, seeds, and parameters are documented here. The complete source file is available at: \colorbox{BurntOrange}{https://github.com/JDLeongomez/Proyecto-IDS}
+**Reproducibility.** All code, seeds, and parameters are documented here. The complete source file is available at: <https://doi.org/10.17605/OSF.IO/D7V3E>.
 
 \newpage
 
@@ -170,7 +168,7 @@ tt(design_tbl) |>
 
 ## Stimulus Generation
 
-Eight manipulated versions of each original IDS recording will be generated using a custom Praat script [@praat] (available at the project repository). Each version corresponds to one cell of the fully crossed 2×2×2 design, in which mean fundamental frequency ($f_0$ mean), pitch variability ($f_0$ SD), and formant frequencies are each set to a High or Low level.
+Eight manipulated versions of each original IDS recording will be generated using a custom Praat script [@praat] (available at <https://doi.org/10.17605/OSF.IO/H5SNB>). Each version corresponds to one cell of the fully crossed 2×2×2 design, in which mean fundamental frequency ($f_0$ mean), pitch variability ($f_0$ SD), and formant frequencies are each set to a High or Low level.
 
 The two levels for each parameter are defined as ±1 between-speaker standard deviation (SD) from the IDS population distribution, computed from Hilton et al.'s [-@hilton2022] cross-cultural corpus of female IDS ($n = 21$ societies; audio: <https://doi.org/10.5281/zenodo.5525161>). Using a single large cross-cultural dataset as the sole source of population norms follows the approach of Aung et al. [-@aung2024], who used ERB-unit steps calibrated to population norms for cross-cultural voice manipulation. The manipulation targets for each speaker are:
 
@@ -186,9 +184,11 @@ An initial pilot using a manipulation of $\pm 1.5$ SD produced pronounced PSOLA 
 
 ### Population norms
 
-The between-speaker population SDs used to calibrate the manipulation targets were derived from Hilton et al.'s [-@hilton2022] corpus [@hilton2022corpus]. Their GitHub repository provides per-recording acoustic measures (including $f_0$ mean and $f_0$ SD) but does not include F3 or F4. To compute the geometric mean of F1--F4 (used as the vocal tract length proxy), F1--F4 were re-extracted from the edited audio files using a custom Praat script. The analysis and all outputs are archived in the `population_norms/` subfolder of this supplementary.
+The between-speaker population SDs used to calibrate the manipulation targets were derived from Hilton et al.'s [-@hilton2022] corpus [@hilton2022corpus]. Their GitHub repository provides per-recording acoustic measures (including $f_0$ mean and $f_0$ SD) but does not include F3 or F4. To compute the geometric mean of F1--F4 (used as the vocal tract length proxy), F1--F4 were re-extracted from the edited audio files using a custom Praat script.The analysis and all outputs are archived in the population_norms/ folder, available in the Materials component (<https://doi.org/10.17605/OSF.IO/H5SNB>).
 
-**Step 1: Formant extraction.** The IDS files (vocalization type `B`, $n = 458$) were downloaded from Zenodo [@hilton2022corpus] and filtered to female speakers using the `stimuli-info.csv` metadata file (column `Gender == "F"`). F1--F4 were extracted with the following Praat script, using the same Burg [analysis settings](https://github.com/themusiclab/infant-speech-song/blob/main/analysis/acoustics_processing/3_masterscript.praat) as Hilton et al. (5500 Hz ceiling, five formants, 25 ms window):
+**Step 1: Formant extraction.** The IDS files (vocalization type `B`, $n = 458$) were downloaded from Zenodo [@hilton2022corpus] and filtered to female speakers using the `stimuli-info.csv` metadata file (column `Gender == "F"`). F1--F4 were extracted with the following Praat script[^1], using the same Burg [analysis settings](https://github.com/themusiclab/infant-speech-song/blob/main/analysis/acoustics_processing/3_masterscript.praat) as Hilton et al. (5500 Hz ceiling, five formants, 25 ms window):
+
+[^1]: Reproducing this section requires the population_norms/ folder (Materials component, <https://doi.org/10.17605/OSF.IO/H5SNB>) to be present in the working directory.
 
 ```{r}
 #| label: praat-extract-display
@@ -236,7 +236,8 @@ norms <- by_speaker |>
 #| code-summary: "hilton2022_population_norms.R (display only — precomputed)"
 
 # Full analysis code is in population_norms/hilton2022_population_norms.R
-# Precomputed outputs loaded from population_norms/by_speaker.rds and norms.rds
+# Precomputed outputs loaded from population_norms/by_speaker.csv; 
+# summary exported to population_norms.csv
 readLines("population_norms/hilton2022_population_norms.R") |> cat(sep = "\n")
 ```
 
@@ -342,7 +343,7 @@ where the slope $b = \sigma_\text{target} / \sigma_\text{src}$ scales the pitch 
 
 Because PSOLA resynthesis introduces a small but systematic discrepancy between the programmed and realised pitch SD, arising from differences between the fixed-timestep pitch analysis grid and the pitch-period-based PitchTier representation, an iterative correction procedure is applied. After each resynthesis, the output is re-analysed; if the absolute difference between the measured and target SD exceeds 0.5 Hz, the slope is updated multiplicatively as $b \leftarrow b \cdot (\sigma_\text{target} / \sigma_\text{measured})$, with the intercept recomputed from the fixed source mean. This repeats up to a maximum of five iterations; convergence is typically achieved within two to three iterations.
 
-**Verification.** All eight output files are re-analysed independently after saving using the same pitch and formant analysis settings as the baseline (5500 Hz ceiling throughout, consistent with synthesis). The geometric mean of F1–F4 is used as the formant frequency metric, consistent with the population norm derivation. The realised $f_0$ mean, $f_0$ SD, and formant frequencies of each stimulus will be reported in the manuscript. The full script is available at \colorbox{BurntOrange}{ADD-URL}.
+**Verification.** All eight output files are re-analysed independently after saving using the same pitch and formant analysis settings as the baseline (5500 Hz ceiling throughout, consistent with synthesis). The geometric mean of F1–F4 is used as the formant frequency metric, consistent with the population norm derivation. The realised $f_0$ mean, $f_0$ SD, and formant frequencies of each stimulus will be reported in the manuscript. The full script is available at <https://doi.org/10.17605/OSF.IO/H5SNB>.
 
 \newpage
 
